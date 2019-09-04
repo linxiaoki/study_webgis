@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="keyword" content="天地图">
+    <script src="http://api.tianditu.gov.cn/api?v=4.0"></script>
+    <style type="text/css">
+        body,html{
+            width:100%;
+            height: 100%;
+            margin:0;
+            font-family: "Microsoft YaHei"
+        }
+        #mapDiv{
+            width:100%;
+            height: 400px;
+        }
+        input,b,p{
+            margin-left:5px;
+            font-size:19px;
+        }
+    </style>
+    <title>地图基本操作</title>
+    <script type="text/javascript">
+        var map,zoom=12;
+        function onLoad(){
+            map=new T.Map("mapDiv",{
+                center:new T.LngLat(116.4,39.899),
+                zoom:12
+            });
+            map.disableDrag();
+        }
+        function zoomOut(){
+            map.zoomOut();
+            changeInfo("本示例演示初地图的放大和缩小。");
+        }
+        function panTo(){
+            setTimeout(function(){
+                map.panTo(new T.LngLat(116.64899,40.12948),13);
+            },2000);
+            changeInfo("本示例演示地图平移操作。");
+        }
+        function mapExtent(){
+
+        }
+        function dragMap(){
+            setTimeout(function(){
+                alert('可以拖拽地图了');
+                map.enableDrag();
+            },2000);
+            changeInfo("本例演示地图可拖拽");
+        }
+        
+        function alertMapExtent(){
+            var bs=map.getBounds();
+
+        }
+
+        function changeInfo(info){
+            document.getElementById("hint_info").innerHTML=info;
+        }
+
+    </script>
+</head>
+<body onload="onLoad()">
+    <div id="mapDiv"></div>
+    <p id="hint_info">本示例演示什么</p>
+    <div >
+        <p>
+            <input type="button" id="button1" onclick="map.zoomIn();changeInfo('本示例演示初地图的放大和缩小。')" value="放大地图">
+            <input type="button" id="button2" onclick="zoomOut()" value="缩小地图">
+            <input type="button" id="button3" onclick="mapExtent()" value="获取地图范围">
+            <input type="button" id="button4" onclick="panTo()" value="2秒后移动地图">
+        </p>
+        <p>
+            <input type="button" id="button5" onclick="dragMap()" value="拖拽地图">
+           <!-- <input type="checkbox" name="mapMove" value="panMap">移动地图到北京&nbsp;
+            &nbsp;&nbsp;-->
+        </p>
+    </div>
+</body>
+</html>
