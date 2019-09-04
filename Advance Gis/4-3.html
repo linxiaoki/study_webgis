@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+ 
+    <style type="text/css">
+        html { height: 100% }
+        body { height: 100%; margin: 0px; padding: 0px }
+        #map_canvas { height: 100% }
+    </style>
+ 
+    <!-- Google Maps and Places API -->
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
+ 
+    <!-- jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+ 
+    <script type="text/javascript">
+        //declare namespace
+        var up206b = {};
+ 
+        //declare globals
+        var map;
+ 
+        //trace function for debugging
+        function trace(message)
+        {
+            if (typeof console != 'undefined')
+            {
+                console.log(message);
+            }
+        }
+ 
+        //Function that gets run when the document loads
+        up206b.initialize = function()
+        {
+            var latlng = new google.maps.LatLng(34.0194543,-118.4911912);
+            var myOptions = {
+                zoom: 14,
+                center: latlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+ 
+        }
+    </script>
+</head>
+ 
+<body onload="up206b.initialize()">
+    <!-- side panel div container -->
+    <div style="position:absolute; width:380px; height: 100%; overflow:auto; float:left; padding-left:10px; padding-right:10px;">
+        <h1>Google Places API</h1>
+    </div>
+    
+    <!-- map div container -->
+
+    <div id="map_canvas" style="height:100%; margin-left:400px;"></div>
+</body>
+</html>

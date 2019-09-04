@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0,user-scalable=no"/>
+    <title>Google Map</title>
+    <style type="text/css">
+
+    </style>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBlY4fHuhl7V8DTkRV2y_wLSqsdDQrEsXI&sensor=true"></script>
+    <!--?key=AIzaSyCLashRsAacU5z2ZZxrdNTrRGeCAj1-C_w-->
+    <script type="text/javascript">
+        //更改CSS，设置高度100%(生效需更改所有父元素)
+        $(document).ready(function(){
+            $("#map_canvas").parents().css("height","100%");
+            $("#map_canvas").css("height","98%");
+            //$("#stoplist").parents().css("height","100%");
+
+            //$("#stoplist").height($(".panel-default").outerHeight()-$(".panel-heading").outerHeight());
+            //问题：子元素高度不要超出父元素？ div#stoplist 被 ul.list-group 撑开
+            //1,  topist.height 计算 , ul.list-group -->  height=98%  overflow=auto  效果不好
+            //2,  pre-scrollable
+            //https://www.yuque.com/fe9/basic/ecdg1z  两栏布局  对高度有影响吗  float
+        });
+    </script>
+
+    <script type="text/javascript">
+        var yoh={};
+        var map;
+        var infowindow = new google.maps.InfoWindow();
+        var UCLAPArking;
+
+        //3.1----------------------------------------
+        yoh.createBusRoutes=function(){
+            $.getJSON("http://api.metro.net/agencies/lametro/routes?callback=?",function(result){
+                $.each(result.items,function(i,item){
+                    $("#stoplist ul").append("<li><a onclick='yoh.mapBusstops("+item.id+")' href='javascript:void(0)'>"+ item.display_name+"</a></li>");
+                    //$("#stoplist").append("<p>"+item.display_name+"</p>");
+                });
+            });
+        }
+
+        var busstop=[];
+        var livebus=[];
+        var bounds;
+        yoh.createStop=function(i,latitude,longitude,title){
+            iconurl="./css/busstop.png";
+            busstop[i]=yoh.createMarker(latitude,longitude,title);
+            busstop[i].setIcon(iconurl);
+            bounds.extend({lat:latitude,lng:longitude});
+            map.fitBounds(bounds);
+        };
+
+        var livebus=[];
+        yoh.createBus=function(i,latitude,longitude,title,contentString){
+            iconurl="./css/bus.png";
+            livebus[i]=yoh.createMarker(latitude,longitude,title,contentString);
+            livebus[i].setIcon(iconurl);
+            livebus[i].setZIndex(2000);
+        }
+
+        yoh.removeLayer=function(){
+            for(i in busstop){
+                busstop[i].setMap(null);
+            }
+            busstop=[];
+            for(i in livebus){
+                livebus[i].setMap(null);
+            }
+            livebus=[];
+        };
+
+        yoh.mapBusstops=function(busnum){
+            yoh.removeLayer();
+            bounds=new google.maps.LatLngBounds();
+            //busstop
+            $.getJSON("http://api.metro.net/agencies/lametro/routes/"+busnum+"/sequence?callback=?",function(result){
+                $.each(result.items,function(i,item){
+                    yoh.createStop(i,item.latitude,item.longitude,item.displayname);
+                });
+            });
+
+            yoh.mapbus(busnum);
+
+            /*
+            //Add a title for the selected stop
+            $.getJSON('http://api.metro.net/agencies/lametro/routes/'+busnum+'?callback?',function(data){
+                (data.display_name);
+                $('#routeinfo').html(data.display_name);
+            }); */
+        };
+
+        //点击展示所有bus   
+        //{longitude,latitude,route_id,predictable?seconds_since_report?run_id?id?heading>}
+        yoh.mapbus=function(busnum){
+            
+            $.get("http://api.metro.net/agencies/lametro/routes/"+busnum+"/vehicles",function(data){
+                //data.items
+                $.each(data.items,function(i,item){
+                    title=item.seconds_since_report +"s";
+                    contentString=JSON.stringify(item).replace(/,/g,",\n");
+                    yoh.createBus(i,item.latitude,item.longitude,title,contentString);
+                });
+            });
+        };
+
+        yoh.mapbus1=function(busnum){
+            $.getJSON("http://api.metro.net/agencies/lametro/routes/"+busnum+"/vehicles?callback=?",function(data){
+                //data.items
+                $.each(data.items,function(i,item){
+                    title=item.secongs_since_report+"s";
+                    contentString=JSON.stringify(item);
+                    yoh.createBus(i,item.latitude,item.longitude,title,contentString);
+                });
+            });
+        };
+
+        // 2.1------------------------------------------------------
+        yoh.createMarker=function(latitude,longitude,title,contentString=""){
+            var markerLatLng=new google.maps.LatLng(latitude,longitude);
+            var marker=new google.maps.Marker({
+                position:markerLatLng,
+                map:map,
+                title:title
+            });
+            if(contentString){
+                google.maps.event.addListener(marker,'click',function(){
+                    infowindow.setContent(contentString);
+                    infowindow.open(map,marker);
+                });
+            }
+            return marker;
+        };
+        //  ----------------------------------------------
+        yoh.initalize=function(){
+            var latlng=new google.maps.LatLng(34.0194543,-118.4911912);
+            var myOptions={
+                zoom:12,
+                center:latlng,
+                mapTypeId:google.maps.MapTypeId.ROADMAP
+            };
+            map=new google.maps.Map(document.getElementById("map_canvas"),myOptions);
+            //marker , infoWindow , buffer
+            yoh.createMarker(34.0194543,-118.4911912,"hello","My info window content");
+            yoh.createMarker(34.321,-119.7,"Culver City","other info window content");
+            UCLAParking = new google.maps.KmlLayer('http://yohman.bol.ucla.edu/kml/UCLAParking.kmz?dummy=' + (new Date()).getTime(),{preserveViewport:true});
+            UCLAParking.setMap(map);
+            var bufferOptions={
+                strokecolor:"#FF0000",
+                strokeOpacity:0.9,
+                strokeWeight:2,
+                fillColor:"#FF0000",
+                fillOpacity:0.15,
+                map:map,
+                center:new google.maps.LatLng(34.005,-119.2),
+                radius:5000
+            };
+            var cityCircle=new google.maps.Circle(bufferOptions);
+            // busstop
+            yoh.createBusRoutes();
+            //yoh.mapBusstops(20);
+        };
+    </script>
+    <!--[if lt IE 9]>
+        <script src="//cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <![endif]-->
+</head>
+<body onload="yoh.initalize()" >
+    <div id="toc" style="position:absolute;width:360px;height:100%;overflow:auto;float:left;padding-left: 10px;padding-right:10px;padding-bottom:10px;" >
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2>Metro LA: Where's that bus?</h2>
+                <h3 id="routeinfo"></h3>
+            </div>
+            <div id="stoplist" class="panel-body" >
+                <ul>
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="map_canvas" style="height:100%;margin-left:380px">
+        
+    </div>
+</body>
+</html>
