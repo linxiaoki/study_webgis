@@ -9,14 +9,7 @@ var satellite = L.tileLayer(mapboxUrl, { id: 'mapbox.satellite', attribution: ma
 var streets = L.tileLayer(mapboxUrl, { id: 'mapbox.streets', attribution: mapAttr });
 var grayscale = L.tileLayer(mapboxUrl, { id: 'mapbox.light' });
 
-var mapO = L.map("mapDiv", {
-    center: [45.51, -122.2],
-    zoom: 6,
-    layers: [
-        satellite, streets, grayscale
-    ]
-});
-var mapOpatity = L.map("mapDiv", {
+var map = L.map("mapDiv", {
     center: [45.51, -122.2],
     zoom: 6,
     layers: [
