@@ -1,8 +1,19 @@
 {
-  "devDependencies": {
-    "webpack": "^4.41.2"
-  },
+  "name": "leaflet-typhoon",
+  "version": "1.0",
+  "description": "使用leaflt实现台风路径渲染",
+  "author": "k",
+  "license": "ISC",
   "scripts": {
-    "start": "webpack"
+    "start": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release": "webpack --config ./"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
+    "babel-loader": "^8.0.6",
+    "webpack": "^4.41.2",
+    "webpack-dev-server": "^3.9.0"
   }
 }

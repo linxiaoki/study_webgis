@@ -1,0 +1,1 @@
+import mapApp from './app.js';
