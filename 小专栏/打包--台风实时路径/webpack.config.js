@@ -1,15 +1,15 @@
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CleanWebpackPlugin = require("clean-webpack-plugin");
+const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 
 module.exports = {
-    mode: "development",
+    mode: "production", //production || development
     entry: __dirname+"/app/main.js",
     output:{
         path: __dirname+"/public",
         filename: "bundle.js"
     },
-    devtool: "source-map",
+    devtool: "none",
     devServer: {
         contentBase: './public',
         historyApiFallback: true,
@@ -24,7 +24,7 @@ module.exports = {
                     loader: "babel-loader"
                 },
                 exclude: /node-modules/
-            },/*{// url-loader 是加强版的 file-loader
+            },{// url-loader 是加强版的 file-loader
                 test: /\.(png|jpe?g|git|svg)$/,
                 use: {
                     loader: 'url-loader',
@@ -34,23 +34,20 @@ module.exports = {
                     }
                 },
                 exclude: /node-modules/
-            }*/
+            }/*
             {
                 test: /\.(png|jpe?g|git|svg)$/,
                 use: {
                     loader: 'file-loader'
-                }
-            }
+                },
+                exclude: /node-modules/
+            }*/
         ]
     },
     plugins: [
         new HtmlWebpackPlugin({
             template: __dirname + "/app/index.tmpl.html"
         }),
-        new CleanWebpackPlugin({
-            root: __dirname,
-            verbose: true,
-            dry: false
-        })
+        new CleanWebpackPlugin()
     ]
 }

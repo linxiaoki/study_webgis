@@ -28,7 +28,51 @@ L.control.layers(basemap).addTo(map);
 jQuery.ajax('http://typhoon.zjwater.gov.cn/Api/TyphoonInfo/201926', {
     type: 'GET',
     dataType: 'jsonp',
-    success: addPolylineAndMarker
+    success: function (typhoonData) {
+        // 动态画线
+        function animateDrawLine(points, icon, popupContent) {
+            var drawPoints = [points[0]];
+            var marker = L.marker(drawPoints[drawPoints.length - 1], { icon: icon }).addTo(map);
+            var lineLayers;
+            var count = 0;
+            var time = setInterval(() => {
+                if (count < points.length - 1) {
+                    count += 1;
+                    drawPoints.push(points[count]);
+                    // lineLaers && map.removeLayer(lineLayers);
+                    lineLayers && map.removeLayer(lineLayers);
+                    lineLayers = null;
+                    map.removeLayer(marker);
+                    lineLayers = L.polyline(drawPoints, { color: 'blue' }).addTo(map);
+                    marker = L.marker(drawPoints[drawPoints.length - 1], { icon: icon }).addTo(map);
+                    if (count == points.length - 1) {
+                        marker.bindPopup(popupContent).openPopup();
+                    }
+                    //console.log("add")
+                } else {
+                    clearInterval(time);
+                }
+            }, 200)
+        }
+        //typhoonCenter=[Number(typhoonData[0]["centerlat"]), Number(typhoonData[0]["centerlng"])];
+        //map.panTo(typhoonCenter); 
+        var forecast = typhoonData[0]["points"];
+        var polylinePoints = [];
+        forecast.forEach(point => {
+            polylinePoints.push([Number(point['lat']), Number(point['lng'])])
+        });
+        map.panTo(polylinePoints[0]);
+        // 图标
+        var typhoonIcon = L.icon({
+            iconUrl: typhoonImg, //'./tornado.png',
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        });
+        popupContent = '<b>' + typhoonData[0]['name'] + '</b></br>' +
+            forecast[forecast.length - 1]['jl'];
+        // 动态画线
+        animateDrawLine(polylinePoints, typhoonIcon, popupContent);
+    }
 });
 /*
 var documentHead = $("head")[0];
@@ -37,6 +81,7 @@ js.src="http://typhoon.zjwater.gov.cn/Api/TyphoonInfo/201926?callback=addPolylin
 documentHead.append(js);
 */
 
+/*
 //回调函数： 动态画线
 function addPolylineAndMarker(typhoonData) {
     // 动态画线
@@ -65,7 +110,7 @@ function addPolylineAndMarker(typhoonData) {
         }, 200)
     }
     //typhoonCenter=[Number(typhoonData[0]["centerlat"]), Number(typhoonData[0]["centerlng"])];
-    //map.panTo(typhoonCenter); 
+    //map.panTo(typhoonCenter);
     var forecast = typhoonData[0]["points"];
     var polylinePoints = [];
     forecast.forEach(point => {
@@ -82,7 +127,7 @@ function addPolylineAndMarker(typhoonData) {
         forecast[forecast.length - 1]['jl'];
     // 动态画线
     animateDrawLine(polylinePoints, typhoonIcon, popupContent);
-};
+};*/
 
 
 
