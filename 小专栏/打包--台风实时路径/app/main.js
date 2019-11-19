@@ -1,1 +1,1 @@
-import mapApp from './app.js';
+import './app.js';
