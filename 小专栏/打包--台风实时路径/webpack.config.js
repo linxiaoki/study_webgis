@@ -7,9 +7,9 @@ module.exports = {
     entry: __dirname+"/app/main.js",
     output:{
         path: __dirname+"/public",
-        filename: "bundle.js"
+        filename: "bundle-[hash].js"
     },
-    devtool: "none",
+    devtool: "none",  // none || eval-source-map
     devServer: {
         contentBase: './public',
         historyApiFallback: true,
@@ -44,10 +44,14 @@ module.exports = {
             }*/
         ]
     },
+    externals: {
+        //jquery: 'jQuery'
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: __dirname + "/app/index.tmpl.html"
         }),
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        new webpack.BannerPlugin("版权所有?_?")
     ]
 }
