@@ -1,13 +1,11 @@
 //app.js
 //import jquery from 'jquery'
 
-
 var typhoonImg = require('./typhoon.png')
 var mapAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">世界地图</a> contributors, ' +
     'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
 var mapboxUrl = "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=" +
     "pk.eyJ1IjoiemhhbmdzMTIzIiwiYSI6ImNrMXR6NjZobzAweW0zY3BrcnB4YmF6M3YifQ.nHmNai_UTcEJdy1VTbCXfg";
-
 var satellite = L.tileLayer(mapboxUrl, { id: 'mapbox.satellite', attribution: mapAttr });
 var streets = L.tileLayer(mapboxUrl, { id: 'mapbox.streets', attribution: mapAttr });
 var grayscale = L.tileLayer(mapboxUrl, { id: 'mapbox.light' });
@@ -26,13 +24,14 @@ var basemap = {
 };
 L.control.layers(basemap).addTo(map);
 
-//！----改成先载入 地图，再画
+
 jQuery.ajax('http://typhoon.zjwater.gov.cn/Api/TyphoonInfo/201926', {
     type: 'GET',
     dataType: 'jsonp',
     jsonp: 'callback',
     success: addPolylineAndMarker
 });
+
 
 /*
 var documentHead = $("head")[0];
