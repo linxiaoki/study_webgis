@@ -1,5 +1,6 @@
 //MapTypeSelect.js
-import {component} from "react"; 
+import { component } from "react";
+// import React,{ component } from "react";
 
 // 地图类型选择器
 export default class MapTypeSelect extends component {
@@ -14,7 +15,6 @@ export default class MapTypeSelect extends component {
                     <option value="TMAP_TERRAIN_HYBRID_MAP">地形混合</option>
                 </select>
             </div>
-            //script?
         );
     }
 };
