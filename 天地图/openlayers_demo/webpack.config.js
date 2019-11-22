@@ -11,7 +11,7 @@ module.exports={
         path: __dirname+"/build",
         filename: "bundle-[hash].js"
     },
-    devtool: "eval-source-map",
+    devtool: "source-map",
     devServer: {
         contentBase: "./build",
         historyApiFallback: true,

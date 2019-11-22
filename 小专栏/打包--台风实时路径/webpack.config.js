@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 
 module.exports = {
-    mode: "production", //production || development
+    mode: "development", //production || development
     entry: __dirname+"/app/main.js",
     output:{
         path: __dirname+"/public",
