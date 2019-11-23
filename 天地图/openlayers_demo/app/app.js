@@ -14,8 +14,8 @@ function onLoad() {
     addControls(map);
 
     var mapTypeStyle = document.getElementById("mapTypeStyle");
-    var mapTypeControl = new THtmlElementControl(mapTypeControl);
-    mapTypeControl.setRight(10);
+    var mapTypeControl = new THtmlElementControl(mapTypeStyle);
+    mapTypeControl.setRight(80);
     mapTypeControl.setTop(10);
     map.addControl(mapTypeControl);
 }
@@ -44,7 +44,7 @@ function addControls() {
 
 // 自定义控件
 // 根据 MapTypeSelect 选择图层
-function switchingMapType(obj) {
+function switchingMapType1(obj) {
     switch (obj.value) {
         case "TMAP_NORMAL_MAP": setNormal();
             break;
@@ -73,7 +73,6 @@ function switchingMapType(obj) {
         map.setMapType(TMAP_TERRAIN_HYBRID_MAP);
     }
 }
-
 
 module.exports = {
     onLoad: onLoad
