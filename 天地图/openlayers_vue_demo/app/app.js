@@ -78,7 +78,17 @@ function switchingMapType1(obj) {
 }
 
 
+var mapTypeSel = new Vue();
+var vueApp = new Vue({
+    el: "#mapTypeStyle",
+    render: h=>h(MapTypeSelect),
+    data: {
+        map: map,
+    }
+});
 
+onLoad();
+/*
 module.exports = {
     onLoad: onLoad
-}
+}*/

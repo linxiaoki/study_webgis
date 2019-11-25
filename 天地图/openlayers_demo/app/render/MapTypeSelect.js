@@ -5,8 +5,8 @@ import React, { Component } from "react";
 
 // 地图类型选择器
 export default class MapTypeSelect extends Component {
-    switchingMaptype(params) {
-        console.log("不行");   
+    switchingMaptype(this) {
+        console.log(this.target.value);   
     }
     render() {
         return (
@@ -17,7 +17,6 @@ export default class MapTypeSelect extends Component {
                 <option value="TMAP_TERRAIN_MAP">地形</option>
                 <option value="TMAP_TERRAIN_HYBRID_MAP">地形混合</option>
             </select>
-
         );
     }
 };

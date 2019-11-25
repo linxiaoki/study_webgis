@@ -1,6 +1,7 @@
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+const VueLoaderPlugin = require("vue-loader/lib/plugin")
 const path = require('path');
 
 module.exports={
@@ -21,17 +22,17 @@ module.exports={
     module:{
         rules: [
             {
+                test: /\.vue$/,
+                use:{
+                    loader: 'vue-loader'
+                }
+            },
+            {
                 test: /\.jsx?$/,
                 use: {
                     loader: 'babel-loader'
                 },
                 exclude:/node_modules/
-            },
-            {
-                test: /\.vue$/,
-                use:{
-                    loader: 'vue-loader'
-                }
             }
         ]
     },
@@ -39,7 +40,8 @@ module.exports={
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname,"app/index.tmpl.html")
         }),
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        new VueLoaderPlugin()
     ],
     externals:{
         
