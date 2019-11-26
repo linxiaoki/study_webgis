@@ -16,7 +16,18 @@
     <div id="deliver-legend-ctrl" style="background:#fff;border:1px solid #c0c0c0">
     </div>
     <table cellpacing="0" cellpading="0" style="width:130px;border:1px solid #ff0000">
-        tr[align=center][style="height:10px;"]>td+td>a[href="javascript:void(0)"]
+        <tr align="center" style="height:10px;">
+            <td></td>
+            <td><a href="javascript:void(0)"></a></td>
+        </tr>
+        <tr align="center">
+            <td>经度</td>
+            <td>$(marker.getLngLat().getLng())</td>
+        </tr>
+        <tr align="center">
+            <td>纬度</td>
+            <td>$(marker.getLngLat().getLat())</td>
+        </tr>
         
     </table>
     
