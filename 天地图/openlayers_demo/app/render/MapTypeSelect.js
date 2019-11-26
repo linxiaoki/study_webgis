@@ -1,16 +1,19 @@
 //MapTypeSelect.js
 //import {Component} from "react";
-// 想用 render ，发现不太会 React, 
+
 import React, { Component } from "react";
 
 // 地图类型选择器
 export default class MapTypeSelect extends Component {
-    switchingMaptype(this) {
-        console.log(this.target.value);   
+
+    // 还要传 map 参数，不会，在 app.js 里面写好了
+    switchingMaptype111(event) {
+        console.log(event.target.value);   
     }
+    // 渲染
     render() {
         return (
-            <select id="mapTypeSelect2" onChange={switchingMapType(this)}>
+            <select id="mapTypeSelect">
                 <option value="TMAP_NORMAL_MAP">地图</option>
                 <option value="TMAP_SATELLITE_MAP">卫星</option>
                 <option value="TMAP_HYBRID_MAP">卫星混合</option>

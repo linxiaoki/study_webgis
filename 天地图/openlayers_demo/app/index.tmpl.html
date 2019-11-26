@@ -11,14 +11,32 @@
       <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
     <![endif]-->
+  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
   <script src="http://api.tianditu.gov.cn/api?v=3.0&tk=7a1d904db1ad0e570a1b0afc5eab78c4"></script>
 </head>
-
+<style>
+  #mapZoom>div{
+    margin: 3px;
+    font-size: 12px;
+    border: solid 2px blue;
+    background: #fff;
+    padding: 2px;
+    line-height: 15px;
+    cursor: pointer;
+  }
+</style>
 <body>
   <h3>openlayers 入门 Demo</h3>
-  <div id="mapDiv" style="position:absolute; height:600px;width:100%"></div>
+  <div id="lineEditControl" style="position:absolute;right:50px">
+    <input id="enable" type="button" value="启动编辑">
+    <input id="disable" type="button" value="禁止编辑">
+  </div>
+  <div id="mapDiv" style="position:absolute; height:100%;width:100%;top:90px;"></div>
   <div id="mapTypeStyle"></div>
-
+  <div id="mapZoom">
+    <div id="zoomIn">放大</div>
+    <div id="zoomOut">缩小</div>
+</div>
 </body>
 
 </html>
