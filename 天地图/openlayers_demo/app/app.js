@@ -2,11 +2,35 @@
 var map;
 
 function onLoad() {
+    var tk = "7a1d904db1ad0e570a1b0afc5eab78c4";
     var zoom = 10;
-    map = new TMap("mapDiv");
-    map.centerAndZoom(new TLngLat(118.7912, 32.061), zoom);
-    map.enableHandleMouseScroll();
+    map = new TMap("mapDiv",{
+        projection: "EPSG:900913"  //4326
+    });
+    
 
+    map.centerAndZoom(new TLngLat(118.7912, 32.061), zoom);
+    map.enableHandleMouseScroll(); // 启用滚轮缩放
+    map.enableContinuousZoom(); // 启用缩放的效果
+
+    // 图层
+    {
+    // 添加自定义图层
+    var tile_config={opacity: 0.4};
+    tile_config.getTileUrl = (x,y,z)=>{
+        return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
+        "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"+
+        "&TILECOL="+ x +"&TILEROW="+ y + "&TILEMATRIX="+ z + "&tk="+tk;
+    };
+    
+    console.log(tile_config["test"]);
+    var layer = new TTileLayer(tile_config); //创建自定义图层对象
+    layer.setGetTileUrl(tile_config.getTileUrl);  // 设置取图函数
+    map.addLayer(layer);
+    }
+
+    //控件
+    {
     // 添加一组控件
     addControls();
 
@@ -28,16 +52,19 @@ function onLoad() {
     zoomControl.setLeft(130);
     zoomControl.setTop(50);
     map.addControl(zoomControl)
+    }
 
+    //叠加层
+    {
     // 叠加层
     addOverlays();
 
-    // 编辑
+    // 启用/关闭 编辑多段线
     var points1 = [];
     points1.push(new TLngLat(118.81125, 32.162));
     points1.push(new TLngLat(118.81125, 32.261));
     points1.push(new TLngLat(118.77123, 32.364));
-    points1.push(new TLngLat(118.97123, 32.416))
+    points1.push(new TLngLat(118.97123, 32.416));
     var line = new TPolyline(points1, {
         strokeColor: 'orange',
         strokeWeight: 6,
@@ -48,9 +75,23 @@ function onLoad() {
     jQuery("div#lineEditControl>input#enable").click(() => line.enableEdit());
     jQuery("div#lineEditControl>input#disable").click(() => line.disableEdit());
 
-    // 给 marker 添加 提示窗
-    addMarkerAndInfo(new TLngLat(118.46125, 32.062))
-
+    // 给 marker 添加 label
+    addMarkerAndInfo(new TLngLat(118.46125, 32.072),"自定义信息1：");
+    addMarkerAndInfo(new TLngLat(118.46125, 32.172),"获取坐标：");
+    
+    // 聚合marker：加载大量 marker
+    // addMarkerClusterer(200);
+    jQuery("div>button#showMarkerClusterer").click(()=>{
+        addMarkerClusterer(200);
+    });
+    }
+    
+    // 事件
+    {
+    // addMapClick();   // click  注册点击事件
+    // addMapMoveend();  // moveend  拖拽事件
+    addMapMousemove();  // mousemove  鼠标悬浮移动事件
+    }
 }
 
 // 控件
@@ -104,6 +145,7 @@ function switchingMapType(event) {
         map.setMapType(TMAP_TERRAIN_HYBRID_MAP);
     }
 }
+
 
 // 覆盖物
 function addOverlays() {
@@ -160,12 +202,13 @@ function addOverlays() {
     var circle = new TCircle(new TLngLat(118.7812, 32.19), 5000, config);
 
     [marker, label, infoWin, line, polygon, rect, ellipse, circle].forEach((x) => map.addOverLay(x));
+    
 }
 
-// marker and infoWindow
-function addMarkerAndInfo(lnglat_) {
+// marker + infoWindow
+function addMarkerAndInfo(lnglat_,text) {
     var marker = new TMarker(lnglat_);
-    var customerWinInfo = new TLabel({
+    var customerInfoLabel = new TLabel({
         position: lnglat_,
         offset: TPixel(0, 0)
     });
@@ -173,12 +216,14 @@ function addMarkerAndInfo(lnglat_) {
     map.addOverLay(marker);
     TEvent.addListener(marker, "click", onClick); // 注册标注的点击时间
 
-
     function onClick() {
+        // 给labelClose 的 id 加上时间戳，这样添加多个 merkerAndInfo的时候，不会一起触发关闭事件
+        var timestamp = new Date().getTime(); 
+        debugger;
         var label_html = `
             <div style="background:#cccc99;height:20px;color:#000;width:135px">
-                <span style="width:100px;float:left;margin-left:2px;">自定义信息：</span>
-                <span style="width:30px;float: right;margin-right:2px" onclick="onClose();"></span>
+                <span style="width:100px;float:left;margin-left:2px;">${text}</span>
+                <span id="labelClose${timestamp}" style="width:30px;float: right;margin-right:3px">关闭</span>
             </div>
             <div id="deliver-legend-ctrl" style="background:#fff;border:1px solid #c0c0c0">
             <table cellpacing="0" cellpading="0" style="width:130px;border:1px solid #ff0000">
@@ -200,31 +245,83 @@ function addMarkerAndInfo(lnglat_) {
                 </tr>
             </table>
             </div>
+            <script>
+                debugger;
+            </script>
         `;
-        var config = {
-            offset: new TPixel(0,0),
-            position: lnglat_
-        }
-        customerWinInfo.setTitle('---------');
-        customerWinInfo.setLabel(label_html);
-        customerWinInfo.getObject().style.zIndex=10000;
-        map.addOverLay(customerWinInfo);
 
-        var obj = customerWinInfo.getObject();
+        customerInfoLabel.setTitle('');   //鼠标悬浮在 label 上会出现标题
+        customerInfoLabel.setLabel(label_html);
+        customerInfoLabel.getObject().style.zIndex=10000;
+        map.addOverLay(customerInfoLabel);
+
+        var obj = customerInfoLabel.getObject();   // label 的 宽，高
         var width = parseInt(obj.offsetWidth);
         var height = parseInt(obj.offsetHeight);
-        console.log(this);
-        var anchor_icon = this.getIcon().getAnchor();
-        console.log(anchor_icon)
+        var anchor_icon = this.getIcon().getAnchor();  // marker 图标的 宽，高
         var pixel = new TPixel(width/-2,height/-2-anchor_icon[1]);
-        customerWinInfo.setOffset(pixel);
-    }
+        customerInfoLabel.setOffset(pixel);
 
-    function onClose() {
-        map.removeOverlay(customerWinInfo);
+        jQuery("span#labelClose"+timestamp).click(()=>{  // 在 addOverLay 后，绑定关闭的事件
+            map.removeOverLay(customerInfoLabel);
+        });
     }
+}
+
+// 聚合Marker
+function addMarkerClusterer(MAX){
+    map.centerAndZoom(new TLngLat(118.7912, 32.061), 5);
+    var markers = [];
+    for(var i=0; i<MAX; i++){
+        var lnglat = new TLngLat(Math.random()*40+85,Math.random()*30+21);
+        markers.push(new TMarker(lnglat));
+    }
+    var markerCluster = new TMarkerClusterer(map,{
+        markers: markers
+    });
 
 }
+
+
+// 注册和移除点击事件  (弹出对话框，内容为点击坐标)
+var mapclick;
+function addMapClick(){
+    removeMapClick();
+    mapclick = TEvent.addListener(map,"click",function(p){
+        var lnglat = map.fromContainerPixelToLngLat(p);
+        alert(lnglat.getLng()+","+lnglat.getLat());
+    });
+}
+function removeMapClick(){
+    TEvent.removeListener(mapclick);
+}
+
+// 注册和移除地图拖拽事件 (弹出对话框，内容为拖拽后中心点的坐标)
+var mapmoveend;
+function addMapMoveend(){
+    removeMapMoveend();
+    mapmoveend = TEvent.addListener(map,"moveend",function(lnglat){
+        alert(lnglat.getLng()+","+lnglat.getLat());
+    });
+}
+function removeMapMoveend(){
+    TEvent.removeListener(mapmoveend);
+}
+
+// 注册和移除地图滑动事件
+var mapmousemmove;
+function addMapMousemove(){
+    removeMousemove();
+    TEvent.addListener(map,"mousemove",(p)=>{
+        var lnglat = map.fromContainerPixelToLngLat(p);
+        jQuery("input#info").val(lnglat.getLng()+","+lnglat.getLat());
+    })
+}
+function removeMousemove(){
+    TEvent.removeListener(mapmousemmove);
+}
+
+
 
 module.exports = {
     onLoad: onLoad
