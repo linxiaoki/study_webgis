@@ -5,38 +5,64 @@ function onLoad() {
     var tk = "7a1d904db1ad0e570a1b0afc5eab78c4";
     var zoom = 10;
     map = new TMap("mapDiv",{
-        projection: "EPSG:900913"  //4326
+        projection: "EPSG:4326"  //900913  或  4326
     });
-    
 
     map.centerAndZoom(new TLngLat(118.7912, 32.061), zoom);
     map.enableHandleMouseScroll(); // 启用滚轮缩放
     map.enableContinuousZoom(); // 启用缩放的效果
 
-    // 图层
+    // 图层: 添加自定义图层 ， 添加 wms 图层
     {
-    // 添加自定义图层
+    // 添加自定义图层 wmts? ，需要设置正确的坐标系：900913<<<<<<
     var tile_config={opacity: 0.4};
+    /*
     tile_config.getTileUrl = (x,y,z)=>{
         return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
         "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"+
         "&TILECOL="+ x +"&TILEROW="+ y + "&TILEMATRIX="+ z + "&tk="+tk;
-    };
-    
-    console.log(tile_config["test"]);
+    };*/
     var layer = new TTileLayer(tile_config); //创建自定义图层对象
-    layer.setGetTileUrl(tile_config.getTileUrl);  // 设置取图函数
-    map.addLayer(layer);
+    layer.setGetTileUrl((x,y,z)=>{
+        return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
+        "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"+
+        "&TILECOL="+ x +"&TILEROW="+ y + "&TILEMATRIX="+ z + "&tk="+tk;
+    });  // 设置取图函数，pdf 是在 config 里面也添加了 setGetTileUrl，不过好像不加也不影响。
+    if(map.getCode()=="EPSG:900913"){ // 坐标系为墨卡托投影才可显示地图
+        map.addLayer(layer);
     }
 
-    //控件
+    // 添加 wms 图层,  
+    jQuery("div#tool").click(()=>{
+        // 使用 事件委托
+        var ev = ev || window.event;
+        var target = ev.target || ev.srcElement;
+        if(map.getCode()!="EPSG:4326"){ //需要设置正确的坐标系： 4326 <<<<<<<<<<<<
+            return;
+        }
+        if(target.nodeName.toLocaleLowerCase() == "input"){
+            switch(target.defaultValue){
+                case "叠加超图WMS服务图层":
+                    addSuperMapLayer('China','http://support.supermap.com:8090/iserver/services/map-china400/wms111/China');
+                    break;
+                case "删除超图WMS服务图层":
+                    map.removeLayer(wmsLayer);
+                    break;
+            }
+            //;
+        }
+    });
+ 
+    }
+
+    //控件  control
     {
     // 添加一组控件
     addControls();
 
     // 自定义控件1 - 地图类型选择
     jQuery('#mapTypeSelect').on("change", switchingMapType); // 添加 change 事件
-    var mapTypeControl = new THtmlElementControl(document.getElementById("mapTypeStyle"));
+    var mapTypeControl = new THtmlElementControl(jQuery("#mapTypeStyle")[0]);
     mapTypeControl.setLeft(30);
     mapTypeControl.setTop(50);
     map.addControl(mapTypeControl);
@@ -54,7 +80,7 @@ function onLoad() {
     map.addControl(zoomControl)
     }
 
-    //叠加层
+    //覆盖物 overlay - button:编辑多段线、marker+label、聚合marker
     {
     // 叠加层
     addOverlays();
@@ -77,7 +103,7 @@ function onLoad() {
 
     // 给 marker 添加 label
     addMarkerAndInfo(new TLngLat(118.46125, 32.072),"自定义信息1：");
-    addMarkerAndInfo(new TLngLat(118.46125, 32.172),"获取坐标：");
+    addMarkerAndInfo(new TLngLat(118.46125, 32.172),"2:获取坐标：");
     
     // 聚合marker：加载大量 marker
     // addMarkerClusterer(200);
@@ -86,12 +112,14 @@ function onLoad() {
     });
     }
     
-    // 事件
+    // 事件 event
     {
     // addMapClick();   // click  注册点击事件
     // addMapMoveend();  // moveend  拖拽事件
     addMapMousemove();  // mousemove  鼠标悬浮移动事件
     }
+
+    
 }
 
 // 控件
@@ -308,7 +336,7 @@ function removeMapMoveend(){
     TEvent.removeListener(mapmoveend);
 }
 
-// 注册和移除地图滑动事件
+// 注册和移除地图滑动事件: 鼠标移动显示当前坐标
 var mapmousemmove;
 function addMapMousemove(){
     removeMousemove();
@@ -321,6 +349,31 @@ function removeMousemove(){
     TEvent.removeListener(mapmousemmove);
 }
 
+
+// 添加 WMS 图层
+var wmsLayer;
+function getWMS(layerName,url,config){
+    if(wmsLayer){
+        map.removeLayer(wmsLayer);
+    }
+    wmsLayer = new TTileLayerWMS(layerName,url,config);  // 创建WMS图层对象
+    map.addLayer(wmsLayer);
+}
+function addSuperMapLayer(layers,url){
+    var config = {
+        REQUEST: "GetMap", //操作名称
+        VERSION: "1.1.1",
+        SERVICE: "WMS",  // 服务类型标识符
+        LAYERS: layers,
+        TRANSPARNENT: true, //输出图像背景是否透明
+        STYLES:"",  // 每个请求图层的用 "," 分隔的描述样式
+        FORMAT: "image/png",
+        SRS:map.getCode(),  // 地图的投影类型
+        WIDTH: 256,  //图片像素宽
+        HEIGHT:256
+    };
+    getWMS(layers,url,config);
+}
 
 
 module.exports = {
