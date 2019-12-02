@@ -1,0 +1,20 @@
+{
+    "presets": ["@babel/env","@babel/react"],
+    "plugins":["@babel/plugin-transform-runtime"]
+    /*,
+    "env": {
+        "development": {
+            "plugins":[[
+                "react-transform",
+                {
+                    "transforms":[{
+                        "transform": "react-transform-hmr",
+                        "imports": ["react"],
+                        "locals": ["module"]
+                    }
+                    ]
+                }
+            ]]
+        }
+    }*/
+}

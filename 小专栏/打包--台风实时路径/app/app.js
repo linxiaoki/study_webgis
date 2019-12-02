@@ -1,17 +1,18 @@
 //app.js
+//import jquery from 'jquery'
+
+var typhoonImg = require('./typhoon.png')
 var mapAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/">世界地图</a> contributors, ' +
-    '<a href="http://giscafer.com/">giscafer</a>, ' +
     'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
 var mapboxUrl = "https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=" +
     "pk.eyJ1IjoiemhhbmdzMTIzIiwiYSI6ImNrMXR6NjZobzAweW0zY3BrcnB4YmF6M3YifQ.nHmNai_UTcEJdy1VTbCXfg";
-
 var satellite = L.tileLayer(mapboxUrl, { id: 'mapbox.satellite', attribution: mapAttr });
 var streets = L.tileLayer(mapboxUrl, { id: 'mapbox.streets', attribution: mapAttr });
 var grayscale = L.tileLayer(mapboxUrl, { id: 'mapbox.light' });
 
 var map = L.map("mapDiv", {
     center: [45.51, -122.2],
-    zoom: 6,
+    zoom: 5,
     layers: [
         satellite, streets, grayscale
     ]
@@ -23,9 +24,25 @@ var basemap = {
 };
 L.control.layers(basemap).addTo(map);
 
+
+jQuery.ajax('http://typhoon.zjwater.gov.cn/Api/TyphoonInfo/201926', {
+    type: 'GET',
+    dataType: 'jsonp',
+    jsonp: 'callback',
+    success: addPolylineAndMarker
+});
+
+
+/*
+var documentHead = $("head")[0];
+var js=document.createElement('script');
+js.src="http://typhoon.zjwater.gov.cn/Api/TyphoonInfo/201926?callback=addPolylineAndMarker";
+documentHead.append(js);
+*/
+
+
 //回调函数： 动态画线
 function addPolylineAndMarker(typhoonData) {
-    console.log(typhoonData);
     // 动态画线
     function animateDrawLine(points, icon, popupContent) {
         var drawPoints = [points[0]];
@@ -52,7 +69,7 @@ function addPolylineAndMarker(typhoonData) {
         }, 200)
     }
     //typhoonCenter=[Number(typhoonData[0]["centerlat"]), Number(typhoonData[0]["centerlng"])];
-    //map.panTo(typhoonCenter); 
+    //map.panTo(typhoonCenter);
     var forecast = typhoonData[0]["points"];
     var polylinePoints = [];
     forecast.forEach(point => {
@@ -61,12 +78,15 @@ function addPolylineAndMarker(typhoonData) {
     map.panTo(polylinePoints[0]);
     // 图标
     var typhoonIcon = L.icon({
-        iconUrl: './tornado.png',
+        iconUrl: typhoonImg , //'./tornado.png',
         iconSize: [28, 28],
         iconAnchor: [14, 14]
     });
-    popupContent = '<b>'+ typhoonData[0]['name']+'</b></br>'+
-    forecast[forecast.length-1]['jl'];
+    popupContent = '<b>' + typhoonData[0]['name'] + '</b></br>' +
+        forecast[forecast.length - 1]['jl'];
     // 动态画线
     animateDrawLine(polylinePoints, typhoonIcon, popupContent);
-}
+};
+
+
+

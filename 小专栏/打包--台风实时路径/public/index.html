@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--主要实现：图层切换，动态绘制路径，图标及弹窗-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>leaflet sample</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/leaflet/1.3.4/leaflet.css">
+    <script src="https://cdn.bootcss.com/leaflet/1.3.4/leaflet.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body>
+    <h2>leaflet demo</h2>
+    <h3>台风的动画效果不显示，提示“已阻止载入混合活动内容”，是因为处于安全考虑，js的http跨域请求被浏览器阻止，可以更改浏览器安全设置：</h3>
+    <p>1. 浏览器：about:config ，修改security.mixed_content.block_active_content 值为 <b>false</b> </p>
+    <p>2. 或者，使用反向代理</p>
+    <div id="mapDiv" style="width:100%;height:600px"></div>
+    <!--script src="bundle.js"></script-->
+    <!--script src="http://typhoon.zjwater.gov.cn/Api/TyphoonInfo/201926?callback=addPolylineAndMarker"></script-->
+<script type="text/javascript" src="bundle-530b9146ddbe2a79fc17.js"></script></body>
+</html>
