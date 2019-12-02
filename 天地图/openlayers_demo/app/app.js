@@ -12,49 +12,6 @@ function onLoad() {
     map.enableHandleMouseScroll(); // 启用滚轮缩放
     map.enableContinuousZoom(); // 启用缩放的效果
 
-    // 图层: 添加自定义图层 ， 添加 wms 图层
-    {
-    // 添加自定义图层 wmts? ，需要设置正确的坐标系：900913<<<<<<
-    var tile_config={opacity: 0.4};
-    /*
-    tile_config.getTileUrl = (x,y,z)=>{
-        return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
-        "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"+
-        "&TILECOL="+ x +"&TILEROW="+ y + "&TILEMATRIX="+ z + "&tk="+tk;
-    };*/
-    var layer = new TTileLayer(tile_config); //创建自定义图层对象
-    layer.setGetTileUrl((x,y,z)=>{
-        return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
-        "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"+
-        "&TILECOL="+ x +"&TILEROW="+ y + "&TILEMATRIX="+ z + "&tk="+tk;
-    });  // 设置取图函数，pdf 是在 config 里面也添加了 setGetTileUrl，不过好像不加也不影响。
-    if(map.getCode()=="EPSG:900913"){ // 坐标系为墨卡托投影才可显示地图
-        map.addLayer(layer);
-    }
-
-    // 添加 wms 图层,  
-    jQuery("div#tool").click(()=>{
-        // 使用 事件委托
-        var ev = ev || window.event;
-        var target = ev.target || ev.srcElement;
-        if(map.getCode()!="EPSG:4326"){ //需要设置正确的坐标系： 4326 <<<<<<<<<<<<
-            return;
-        }
-        if(target.nodeName.toLocaleLowerCase() == "input"){
-            switch(target.defaultValue){
-                case "叠加超图WMS服务图层":
-                    addSuperMapLayer('China','http://support.supermap.com:8090/iserver/services/map-china400/wms111/China');
-                    break;
-                case "删除超图WMS服务图层":
-                    map.removeLayer(wmsLayer);
-                    break;
-            }
-            //;
-        }
-    });
- 
-    }
-
     //控件  control
     {
     // 添加一组控件
@@ -119,6 +76,71 @@ function onLoad() {
     addMapMousemove();  // mousemove  鼠标悬浮移动事件
     }
 
+    
+    // 图层: 添加自定义图层 ， 添加 wms 图层
+    {
+        // 添加自定义图层 wmts? ，需要设置正确的坐标系：900913<<<<<<
+        var tile_config={opacity: 0.4};
+        /*
+        tile_config.getTileUrl = (x,y,z)=>{
+            return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
+            "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"+
+            "&TILECOL="+ x +"&TILEROW="+ y + "&TILEMATRIX="+ z + "&tk="+tk;
+        };*/
+        var layer = new TTileLayer(tile_config); //创建自定义图层对象
+        layer.setGetTileUrl((x,y,z)=>{
+            return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
+            "&VERSION=1.0.0&LAYER=img&STYLE=default&TILEMATRIXSET=w&FORMAT=tiles"+
+            "&TILECOL="+ x +"&TILEROW="+ y + "&TILEMATRIX="+ z + "&tk="+tk;
+        });  // 设置取图函数，pdf 是在 config 里面也添加了 setGetTileUrl，不过好像不加也不影响。
+        if(map.getCode()=="EPSG:900913"){ // 坐标系为墨卡托投影才可显示地图
+            map.addLayer(layer);
+        }
+    
+        // 添加 wms 图层,  
+        jQuery("div#wmstool").click((ev)=>{
+            // 使用 事件委托
+            var ev = ev || window.event;
+            var target = ev.target || ev.srcElement;
+            if(map.getCode()!="EPSG:4326"){ //需要设置正确的坐标系： 4326 <<<<<<<<<<<<
+                return;
+            }
+            if(target.nodeName.toLocaleLowerCase() == "input"){
+                switch(target.defaultValue){
+                    case "叠加超图WMS服务图层":
+                        addSuperMapLayer('China','http://support.supermap.com:8090/iserver/services/map-china400/wms111/China');
+                        break;
+                    case "删除超图WMS服务图层":
+                        map.removeLayer(wmsLayer);
+                        break;
+                }
+                //;
+            }
+        });
+    }
+
+    // 工具
+    {
+        addTools();
+        jQuery("div#rectTool").click((ev)=>{
+            var ev=ev || window.event;
+            var target=ev.target || ev.srcElement;
+            if(target.nodeName.toLocaleLowerCase()=="input"){
+                switch(target.defaultValue){
+                    case "开启":
+                        rectTool.open();
+                        break;
+                    case "关闭":
+                        rectTool.close();
+                        break;
+                    case "清除":
+                        console.log("清除")
+                        rectTool.clear();
+                        break;
+                }
+            }
+        });
+    }
     
 }
 
@@ -373,6 +395,27 @@ function addSuperMapLayer(layers,url){
         HEIGHT:256
     };
     getWMS(layers,url,config);
+}
+
+// 工具
+var rectTool;
+function addTools(){
+    var rect;
+    // 矩形绘制工具
+    var config={
+        strokeColor: "blue",
+        strokeWeight:"5px",
+        strokeStyle: "solid",
+        fillColor:"#FFFFFF",
+        opacity:0.5
+    };
+    rectTool = new TRectTool(map,config);
+    TEvent.addListener(rectTool,"draw",(bounds)=>{
+        // 注册矩形工具绘制完成后的事件
+        rect=new TRect(bounds);
+        map.addOverLay(rect);
+        //rectTool.close(); //？？ 有必要吗，不是有关闭的按钮了
+    });
 }
 
 

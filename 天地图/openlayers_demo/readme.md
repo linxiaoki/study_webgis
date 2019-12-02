@@ -41,6 +41,10 @@
             getImg(x:Number,y:Number,z:Number): 返回块号对应的html对象(div 或者 image)
             getAllImg(): 返回包含所有image的一个对象
     1.2 WMS图层  TTileLayerWMS(name,url,opts)
+
+7. 地图工具
+    1.1 标注工具 TMarkTool
+
     
 
 

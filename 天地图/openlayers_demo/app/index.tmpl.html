@@ -25,21 +25,26 @@
     cursor: pointer;
   }
 </style>
-<body>  
+<body>
   <h3>openlayers 入门 Demo</h3>
   <div>
     <button id="showMarkerClusterer">聚合点展示</button>
     <input type="text" id="info" value="test"></input>
-    <div id="tool" style="margin:5px;padding:0px;border:0px;background:#f4f4ed;position:absolute;width:100%;height:100%;">
+    <div id="wmstool" style="margin:5px;padding:0px;border:0px;background:#f4f4ed;position:absolute;width:100%;height:100%;">
       <input type="button" value="叠加超图WMS服务图层">
       <input type="button" value="删除超图WMS服务图层">
+    </div>
+    <div id="rectTool" style="margin:0px;padding:0px;border:0px;background:#f4f4ed;position: absolute;width:100%;height:100%">
+      <input type="button" value="开启">
+      <input type="button" value="关闭">
+      <input type="button" value="清除">
     </div>
   </div>
   <div id="lineEditControl" style="position:absolute;right:50px">
     <input id="enable" type="button" value="启动编辑">
     <input id="disable" type="button" value="禁止编辑">
   </div>
-  <div id="mapDiv" style="position:absolute; height:100%;width:100%;top:120px;"></div>
+  <div id="mapDiv" style="position:absolute; height:70%;width:100%;top:120px;"></div>
   <div id="mapTypeStyle"></div>
   <div id="mapZoom" style="position:relative">
     <div id="zoomIn">放大</div>
