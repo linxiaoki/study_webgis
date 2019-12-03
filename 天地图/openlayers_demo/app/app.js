@@ -413,7 +413,7 @@ function addTools(){
     TEvent.addListener(rectTool,"draw",(bounds)=>{
         // 注册矩形工具绘制完成后的事件
         rect=new TRect(bounds);
-        map.addOverLay(rect);
+        //map.addOverLay(rect); // 添加后就不能clear了
         //rectTool.close(); //？？ 有必要吗，不是有关闭的按钮了
     });
 }
