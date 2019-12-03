@@ -15,7 +15,7 @@
   <script src="http://api.tianditu.gov.cn/api?v=3.0&tk=7a1d904db1ad0e570a1b0afc5eab78c4"></script>
 </head>
 <style>
-  #mapZoom>div{
+  #mapZoom>div {
     margin: 3px;
     font-size: 12px;
     border: solid 2px blue;
@@ -25,30 +25,39 @@
     cursor: pointer;
   }
 </style>
+
 <body>
   <h3>openlayers 入门 Demo</h3>
   <div>
     <button id="showMarkerClusterer">聚合点展示</button>
     <input type="text" id="info" value="test"></input>
-    <div id="wmstool" style="margin:5px;padding:0px;border:0px;background:#f4f4ed;position:absolute;width:100%;height:100%;">
-      <input type="button" value="叠加超图WMS服务图层">
-      <input type="button" value="删除超图WMS服务图层">
-    </div>
-    <div id="rectTool" style="margin:0px;padding:0px;border:0px;background:#f4f4ed;position: absolute;width:100%;height:100%">
-      <input type="button" value="开启">
-      <input type="button" value="关闭">
-      <input type="button" value="清除">
-    </div>
+      <div id="wmstool" style="position:absolute;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%;">
+        <input type="button" value="叠加超图WMS服务图层">
+        <input type="button" value="删除超图WMS服务图层">
+      </div>
+      <div id="rectTool" style="position:absolute;top:120px;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%">
+        <span>矩形工具</span>
+        <input type="button" value="开启">
+        <input type="button" value="关闭">
+        <input type="button" value="清除">
+      </div>
+      <div id="lineTool" style="position:absolute;top:120px;left:230px;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%">
+        <span>折线工具</span>
+        <input type="button" value="开启">
+        <input type="button" value="关闭">
+        <input type="button" value="清除">
+      </div>
   </div>
   <div id="lineEditControl" style="position:absolute;right:50px">
     <input id="enable" type="button" value="启动编辑">
     <input id="disable" type="button" value="禁止编辑">
   </div>
-  <div id="mapDiv" style="position:absolute; height:85%;width:100%;top:120px;"></div>
+  <div id="mapDiv" style="position:absolute; height:75%;width:100%;top:220px;"></div>
   <div id="mapTypeStyle"></div>
   <div id="mapZoom" style="position:relative">
     <div id="zoomIn">放大</div>
     <div id="zoomOut">缩小</div>
   </div>
 </body>
+
 </html>

@@ -122,6 +122,7 @@ function onLoad() {
     // 工具
     {
         addTools();
+        
         jQuery("div#rectTool").click((ev)=>{
             var ev=ev || window.event;
             var target=ev.target || ev.srcElement;
@@ -134,12 +135,29 @@ function onLoad() {
                         rectTool.close();
                         break;
                     case "清除":
-                        console.log("清除")
-                        rectTool.clear();
+                        //rectTool.clear();   // 没用？
+                        map.removeOverLay(rectOverlay);
                         break;
                 }
             }
         });
+        jQuery("div#lineTool").click((ev)=>{
+            var ev = ev || window.event;
+            var target = ev.target || ev.srcElement;
+            if(target.nodeName.toLocaleLowerCase()=="input"){
+                switch(target.defaultValue){
+                    case "开启":
+                        lineTool.open();
+                        break;
+                    case "关闭":
+                        lineTool.close();
+                        break;
+                    case "清除":
+                        lineTool.clear();
+                        break;
+                }
+            }
+        })
     }
     
 }
@@ -398,9 +416,8 @@ function addSuperMapLayer(layers,url){
 }
 
 // 工具
-var rectTool;
+var rectTool,rectOverlay,lineTool;
 function addTools(){
-    var rect;
     // 矩形绘制工具
     var config={
         strokeColor: "blue",
@@ -412,9 +429,21 @@ function addTools(){
     rectTool = new TRectTool(map,config);
     TEvent.addListener(rectTool,"draw",(bounds)=>{
         // 注册矩形工具绘制完成后的事件
-        rect=new TRect(bounds);
-        //map.addOverLay(rect); // 添加后就不能clear了
-        //rectTool.close(); //？？ 有必要吗，不是有关闭的按钮了
+        rectOverlay=new TRect(bounds);
+        map.addOverLay(rectOverlay);
+        rectTool.close(); //？？ 有必要吗，不是有关闭的按钮了
+    });
+
+    //折线绘制工具
+    var config={
+        strokeColor: "blue",
+        strokeWeight: "3px",
+        strokeOpacity: 0.5,
+        strokeStyle: "solid"
+    };
+    lineTool=new TPolylineTool(map,config);
+    TEvent.addListener(lineTool,"draw",()=>{
+        lineTool.close();
     });
 }
 
