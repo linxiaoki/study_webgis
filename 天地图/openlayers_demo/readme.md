@@ -31,6 +31,7 @@
     9) .returnTrue(event:String) //同上，返回 true
 ？addListener 和 bind 的区别
 
+? TEvent.bind(marker,'dragend',marker,function(lnglat){} )
 6. 地图图层 
     1.1 自定义图层 （WMTS）TTileLayer(opts:TTileLayerOptions)
         1) 参数：isPng, opacity, tileUrlTemplate, errorImg, zIndex, minResolution, maxResolution

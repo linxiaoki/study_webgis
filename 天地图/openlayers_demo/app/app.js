@@ -157,6 +157,44 @@ function onLoad() {
                         break;
                 }
             }
+        });
+        jQuery("div#markerTool").click((ev)=>{
+            // addListener()
+            // bind()
+            var ev = ev || window.event;
+            var target = ev.target || ev.srcElement;
+            if(target.nodeName.toLocaleLowerCase()=='input'){
+                console.log("test-begin");
+                switch(target.defaultValue){
+                    case "开启":
+                        markerTool.open();
+                        break;
+                    case "关闭":
+                        markerTool.close();
+                        break;
+                    case "编辑":
+                        if(marker==null){ 
+                            alert('请先画点');
+                            return;
+                        }else{
+                            marker.enableEdit();
+                            //bind: 一直生效？
+                            var listener=TEvent.bind(marker,'dragend',marker,function(lnglat){
+                                console.log("test-inlistener");
+                                TEvent.removeListener(listener);
+                                alert("当前坐标："+lnglat.getLng()+","+lnglat.getLat());
+                            })
+                            /*//addListener: 拖拽一次后失效?
+                            var listener=TEvent.addListener(marker,"dragend",(lnglat)=>{
+                                console.log("test_listener");
+                                TEvent.removeListener(listener);
+                                alert("当前坐标："+lnglat.getLng()+","+lnglat.getLat());
+                            })*/
+                        }
+                        break;
+                }
+                
+            }
         })
     }
     
@@ -232,7 +270,7 @@ function addOverlays() {
     points1.push(new TLngLat(118.79125, 32.162));
     points1.push(new TLngLat(118.79125, 32.061));
     points1.push(new TLngLat(118.59123, 32.164));
-    points1.push(new TLngLat(118.69123, 32.066))
+    points1.push(new TLngLat(118.69123, 32.066));
     var line = new TPolyline(points1, {
         strokeColor: 'black',
         strokeWeight: 6,
@@ -417,6 +455,7 @@ function addSuperMapLayer(layers,url){
 
 // 工具
 var rectTool,rectOverlay,lineTool;
+var marker,markerTool;
 function addTools(){
     // 矩形绘制工具
     var config={
@@ -445,6 +484,17 @@ function addTools(){
     TEvent.addListener(lineTool,"draw",()=>{
         lineTool.close();
     });
+
+    // 标注工具
+    // 有个问题，参考代码也是这样，
+    //？？只有在添加标注之后点击编辑才可以对标注进行编辑，并且不可以退出编辑状态？？？
+    markerTool = new TMarkTool(map);
+    TEvent.addListener(markerTool,"mouseup",(lnglat)=>{
+        console.log("test-end?");
+        marker = TMarker(lnglat);
+        map.addOverLay(marker);
+        markerTool.close();
+    })
 }
 
 
