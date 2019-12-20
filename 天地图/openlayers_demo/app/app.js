@@ -122,7 +122,7 @@ function onLoad() {
     // 工具
     {
         addTools();
-        
+        // 触发：矩形工具打开
         jQuery("div#rectTool").click((ev)=>{
             var ev=ev || window.event;
             var target=ev.target || ev.srcElement;
@@ -141,6 +141,7 @@ function onLoad() {
                 }
             }
         });
+        // 触发：折线工具打开
         jQuery("div#lineTool").click((ev)=>{
             var ev = ev || window.event;
             var target = ev.target || ev.srcElement;
@@ -158,13 +159,13 @@ function onLoad() {
                 }
             }
         });
+        // 触发：标注工具打开
         jQuery("div#markerTool").click((ev)=>{
             // addListener()
             // bind()
             var ev = ev || window.event;
             var target = ev.target || ev.srcElement;
             if(target.nodeName.toLocaleLowerCase()=='input'){
-                console.log("test-begin");
                 switch(target.defaultValue){
                     case "开启":
                         markerTool.open();
@@ -180,13 +181,11 @@ function onLoad() {
                             marker.enableEdit();
                             //bind: 一直生效？
                             var listener=TEvent.bind(marker,'dragend',marker,function(lnglat){
-                                console.log("test-inlistener");
                                 TEvent.removeListener(listener);
                                 alert("当前坐标："+lnglat.getLng()+","+lnglat.getLat());
                             })
                             /*//addListener: 拖拽一次后失效?
                             var listener=TEvent.addListener(marker,"dragend",(lnglat)=>{
-                                console.log("test_listener");
                                 TEvent.removeListener(listener);
                                 alert("当前坐标："+lnglat.getLng()+","+lnglat.getLat());
                             })*/
@@ -195,7 +194,72 @@ function onLoad() {
                 }
                 
             }
+        });
+        // 触发：多边形工具打开
+        jQuery("div#polygonTool").click((ev)=>{
+            var ev = ev || window.event;
+            console.log("test window event");
+            console.log(window.event);
+            var target = ev.target || ev.srcElement;
+            if(target.nodeName.toLocaleLowerCase()=="input"){
+                switch(target.defaultValue){
+                    case "开启":
+                        polygonTool.open();
+                        break;
+                    case "关闭":
+                        polygonTool.close();
+                        break;
+                }
+            }
+        });
+        // 触发：圆形工具打开
+        jQuery("div#circleTool").click((ev)=>{
+            var ev = ev || window.event;
+            var target = ev.target || ev.srcElement;
+            if(target.nodeName.toLocaleLowerCase()=="input"){
+                switch(target.defaultValue){
+                    case "开启":
+                        circleTool.open();
+                        break;
+                    case "关闭":
+                        circleTool.close();
+                        break;
+                }
+            }
         })
+    }
+
+    // 右键菜单
+    {
+     var menu = new TContextMenu();  // 创建右键菜单对象
+     var txtMenuItems = [
+         {
+            text: '放大',
+            callback: ()=>{map.zoomIn}
+        },{
+            text: '缩小',
+            callback: ()=>{map.zoomOut}
+        },{
+            text: '放置到最大级',
+            callback: ()=>{map.setZoom(18)}
+        },{
+            text: '查看全国',
+            callback: ()=>{map.setZoom(4)}
+        },{
+            text: '查看当前坐标',
+            isDisable: false,
+            callback: (lnglat)=>{alert(lnglat.getLng()+","+lnglat.getLat());}
+        }
+    ];
+    txtMenuItems.forEach((txtmenuItem, index)=>{
+        //var options = new TMenuItemOptions();
+        //options.width = 100;
+        menu.addItem(new TMenuItem(txtmenuItem.text,txtmenuItem.callback,{width:100}));
+        if(index==1 || index==3){
+            menu.addSeparator(); // 创建分隔线
+        }
+    });
+    map.addContextMenu(menu);
     }
     
 }
@@ -454,8 +518,9 @@ function addSuperMapLayer(layers,url){
 }
 
 // 工具
-var rectTool,rectOverlay,lineTool;
-var marker,markerTool;
+var rectTool, rectOverlay, lineTool;
+var marker, markerTool;
+var polygonTool, circleTool;
 function addTools(){
     // 矩形绘制工具
     var config={
@@ -472,7 +537,6 @@ function addTools(){
         map.addOverLay(rectOverlay);
         rectTool.close(); //？？ 有必要吗，不是有关闭的按钮了
     });
-
     //折线绘制工具
     var config={
         strokeColor: "blue",
@@ -484,7 +548,6 @@ function addTools(){
     TEvent.addListener(lineTool,"draw",()=>{
         lineTool.close();
     });
-
     // 标注工具
     // 有个问题，参考代码也是这样，
     //？？只有在添加标注之后点击编辑才可以对标注进行编辑，并且不可以退出编辑状态？？？
@@ -494,7 +557,34 @@ function addTools(){
         marker = TMarker(lnglat);
         map.addOverLay(marker);
         markerTool.close();
-    })
+    });
+    //多边形工具
+    config = {
+        strokeColor: "blue",
+        strokeWeight: "3px",
+        strokeOpacity: 0.5,
+        strokeStyle: "dashed",
+        fillColor: "#FFFFFF",
+        fillOpacity: 0.5
+    };
+    polygonTool = new TPolygonTool(map,config);
+    TEvent.addListener(polygonTool,"draw",(bounds,area)=>{
+        polygonTool.close();
+        console.log("坐标:"+bounds);
+        console.log(area);
+    });
+    //圆形工具
+    circleTool = new TCircleTool(map,config);
+    TEvent.addListener(circleTool, "draw",(center,radius)=>{
+        jQuery("div#circleTool>input#circleInfo").val("半径是："+ parseInt(radius) +"米");
+        //jQuery("div#circleTool>input#circleInfo")[0].value="tet";
+
+    });
+    TEvent.addListener(circleTool,"drawend",(circle)=>{
+        // map.addOverLay(circle); //不可以添加。。。
+        map.addOverLay(new TCircle(circle.getCenter(),circle.getRadius())); // 默认的样式
+        circleTool.close();
+    });
 }
 
 

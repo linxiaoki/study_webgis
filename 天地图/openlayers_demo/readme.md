@@ -33,7 +33,7 @@
 
 ? TEvent.bind(marker,'dragend',marker,function(lnglat){} )
 6. 地图图层 
-    1.1 自定义图层 （WMTS）TTileLayer(opts:TTileLayerOptions)
+    6.1 自定义图层 （WMTS）TTileLayer(opts:TTileLayerOptions)
         1) 参数：isPng, opacity, tileUrlTemplate, errorImg, zIndex, minResolution, maxResolution
         2) 方法：
             getObject()
@@ -41,10 +41,26 @@
             setGetTileUrl(function:Function): 设置取图函数 (x,y,z)=>{ someurl+x+y+z;} ,返回图片的路径
             getImg(x:Number,y:Number,z:Number): 返回块号对应的html对象(div 或者 image)
             getAllImg(): 返回包含所有image的一个对象
-    1.2 WMS图层  TTileLayerWMS(name,url,opts)
+    6.2 WMS图层  TTileLayerWMS(name,url,opts)
 
 7. 地图工具
-    1.1 标注工具 TMarkTool
+    7.1 标注工具 TMarkTool
+    7.2 矩形工具 TRectTool
+    7.3 折线工具 TPolylineTool
+    7.4 多边形工具 TPolygonTool
+    7.5 圆形工具 TCircleTool
+    ->点击按钮（按钮绑定js事件打开工具），打开工具，触发绑定的事件，通过 draw,click 执行工具的操作，结束后。
+
+8. 右键菜单 TContextMenu
+    1) addItem() 添加菜单项 => TMenuItem
+    2) getItem() 返回指定索引的菜单项，从0开始
+    3) removeItem()
+    4) addSeparator()  添加分隔符？
+    5) removeSepartor()
+    6) getItems()   返回所有的TMenuItem，是数组
+    7) getAllSeparato()   返回所有分隔线，是数组
+
+
 
     
 
