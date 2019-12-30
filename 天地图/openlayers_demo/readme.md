@@ -60,6 +60,8 @@
     6) getItems()   返回所有的TMenuItem，是数组
     7) getAllSeparato()   返回所有分隔线，是数组
 
+9. 服务
+    9.1 搜索(TLocalSearch): 位置搜索、周边搜索和范围检索
 
 
     

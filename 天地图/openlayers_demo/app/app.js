@@ -235,10 +235,10 @@ function onLoad() {
      var txtMenuItems = [
          {
             text: '放大',
-            callback: ()=>{map.zoomIn}
+            callback: ()=>{map.zoomIn()}
         },{
             text: '缩小',
-            callback: ()=>{map.zoomOut}
+            callback: ()=>{map.zoomOut()}
         },{
             text: '放置到最大级',
             callback: ()=>{map.setZoom(18)}
