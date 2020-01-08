@@ -2,7 +2,6 @@
 var map;
 
 function onLoad() {
-    var tk = "7a1d904db1ad0e570a1b0afc5eab78c4";
     var zoom = 10;
     map = new TMap("mapDiv",{
         projection: "EPSG:4326"  //900913  或  4326
@@ -12,7 +11,7 @@ function onLoad() {
     map.enableHandleMouseScroll(); // 启用滚轮缩放
     map.enableContinuousZoom(); // 启用缩放的效果
 
-    //控件  control
+    //⊙⊙ 控件  control
     {
     // 添加一组控件
     addControls();
@@ -37,7 +36,7 @@ function onLoad() {
     map.addControl(zoomControl)
     }
 
-    //覆盖物 overlay - button:编辑多段线、marker+label、聚合marker
+    //⊙⊙ 覆盖物 overlay - button:编辑多段线、marker+label、聚合marker
     {
     // 叠加层
     addOverlays();
@@ -69,7 +68,7 @@ function onLoad() {
     });
     }
     
-    // 事件 event
+    //⊙⊙ 事件 event
     {
     // addMapClick();   // click  注册点击事件
     // addMapMoveend();  // moveend  拖拽事件
@@ -77,10 +76,11 @@ function onLoad() {
     }
 
     
-    // 图层: 添加自定义图层 ， 添加 wms 图层
+    //⊙⊙ 图层: 添加自定义图层 ， 添加 wms 图层
     {
         // 添加自定义图层 wmts? ，需要设置正确的坐标系：900913<<<<<<
         var tile_config={opacity: 0.4};
+        var tk = "7a1d904db1ad0e570a1b0afc5eab78c4";
         /*
         tile_config.getTileUrl = (x,y,z)=>{
             return "http://t0.tianditu.gov.cn/img_w/wmts?"+"SERVICE=WMTS&REQUEST=GetTile"+
@@ -119,7 +119,7 @@ function onLoad() {
         });
     }
 
-    // 工具
+    //⊙⊙ 工具
     {
         addTools();
         // 触发：矩形工具打开
@@ -229,7 +229,7 @@ function onLoad() {
         })
     }
 
-    // 右键菜单
+    //⊙⊙ 右键菜单
     {
      var menu = new TContextMenu();  // 创建右键菜单对象
      var txtMenuItems = [
@@ -262,14 +262,21 @@ function onLoad() {
     map.addContextMenu(menu);
     }
     
+    //⊙⊙ 服务-搜索
+    var config = {
+        pageCapacity: 10,
+        onSearchComplete: localSearchResult //接收数据的回调函数
+    }
 }
+
+//⊙⊙ 以下是调用的方法
 
 // 控件
 function addControls() {
     var navigation_control = new TNavigationControl({
         type: "TMAP_NAVIGATION_CONTROL_LARGE",
-        anchor: "TMAP_ANCHOR_TOP_RIGHT",
-        offset: [0, 0],
+        anchor: "TMAP_ANCHOR_TOP_LEFT",
+        offset: [0, 50],
         showZoomInfo: true
     });
     var overview_control = new TOverviewMapControl({

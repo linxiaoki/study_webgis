@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="keywords" content="天地图">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>OpenLayers Demo</title>
@@ -24,6 +25,13 @@
     line-height: 15px;
     cursor: pointer;
   }
+  div.mapTool{
+    position: absolute;
+    margin: 5px;
+    padding: 0px;
+    border: 0px;
+    background: #f4f4ed;
+  }
 </style>
 
 <body>
@@ -31,33 +39,33 @@
   <div>
     <button id="showMarkerClusterer">聚合点展示</button>
     <input type="text" id="info" value="test"></input>
-      <div id="wmstool" style="position:absolute;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%;">
+      <div id="wmstool" class="mapTool" >
         <input type="button" value="叠加超图WMS服务图层">
         <input type="button" value="删除超图WMS服务图层">
       </div>
-      <div id="rectTool" style="position:absolute;top:120px;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%">
+      <div id="rectTool" class="mapTool" style="top:120px;">
         <span>矩形工具</span>
         <input type="button" value="开启">
         <input type="button" value="关闭">
         <input type="button" value="清除">
       </div>
-      <div id="lineTool" style="position:absolute;top:120px;left:260px;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%">
+      <div id="lineTool" class="mapTool" style="top:120px;left:260px;">
         <span>折线工具</span>
         <input type="button" value="开启">
         <input type="button" value="关闭">
         <input type="button" value="清除">
       </div>
-      <div id="markerTool" style="position:absolute;top:120px;left:540px;margin:5px;padding:0px;background:#f4f4ed;width:100%;height:100%">
+      <div id="markerTool" class="mapTool" style="top:120px;left:540px;">
         <span>标注工具</span>
         <input type="button" value="开启">
         <input type="button" value="关闭 ">
         <input type="button" value="编辑">
       </div>
-      <div id="polygonTool" style="position:absolute;top:160px;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%">
+      <div id="polygonTool" class="mapTool" style="top:160px;order:0px;">
         <span>多边形工具</span>
         <input type="button" value="开启"><input type="button" value="关闭">
       </div>
-      <div id="circleTool" style="position:absolute;top:160px;left:260px;margin:5px;padding:0px;border:0px;background:#f4f4ed;width:100%;height:100%">
+      <div id="circleTool"class="mapTool"  style="top:160px;left:260px;">
         <span>画圆工具</span>
         <input type="button" value="开启"><input type="button" value="关闭">
         <input type="text" name="" id="circleInfo">
@@ -72,6 +80,30 @@
   <div id="mapZoom" style="position:relative">
     <div id="zoomIn">放大</div>
     <div id="zoomOut">缩小</div>
+  </div>
+  <!--搜索面板-->
+  <div class="search">
+    <input type="text" id="keywords" value="KFC" style="border:0px solid #999999;font-size:large">
+    <input type="button" id="searchBtn" value="搜索">
+  </div>
+  <br>
+  <!--提示词面板-->
+  <div id="promptDiv" class="prompt"></div>
+  <!--统计面板-->
+  <div id="statisticsDiv" class="statistics"></div>
+  <!--搜索结果面板-->
+  <div id="resultDiv" class="result">
+    <div id="searchDiv"></div>
+    <div id="pageDiv">
+      <input type="button" value="第一页" onClick="localsearch.firtPage()">
+      <input type="button" value="上一页" onClick="localsearch.previousPage()">
+      <input type="button" value="下一页" onClick="localsearch.nextPage()">
+      <input type="button" value="最后一页" onClick="localsearch.lastPage()">
+      <br>
+      转到第<input type="text" name="" id="pageId" value="1" size="3">页
+      <input type="button" onClick="localsearch.goto" value="转到">
+    </div>
+
   </div>
 </body>
 
