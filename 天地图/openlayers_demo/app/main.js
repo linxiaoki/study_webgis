@@ -3,7 +3,7 @@
 import {render} from 'react-dom';
 import React from 'react';
 import MapTypeSelect from './render/MapTypeSelect';
-import './style.css';
+import './main.css';
 const {onLoad} = require("./app.js");
 
 // 自定义样式地图类型控件，事件在 app.js 里面绑定
