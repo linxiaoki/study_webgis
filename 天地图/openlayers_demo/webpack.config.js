@@ -1,6 +1,7 @@
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require('path');
 
 module.exports={
@@ -28,23 +29,19 @@ module.exports={
                 exclude:/node_modules/
             },{
                 test: /\.css$/,
-                use:[
-                    {
-                        loader: 'style-loader'
-                    },{
-                        loader: 'css-loader',
-                        options: {
-                            modules:{
-                                localIdentName: '[name]_[local]--[hash:base64:5]'
-                            }
-                        }
-                    },{
+                use:[{
+                        loader: MiniCssExtractPlugin.loader
+                     },{
+                         loader: 'css-loader',
+                         options: {
+                             modules: {
+                                 localIdentName: '[name]_[local]--[hash:base64:5]'
+                             }
+                         }
+                     },{
                         loader: 'postcss-loader'
-                    }
-                ],
+                }],
                 exclude: /(node_modules|\.vscode)/
-            },{
-
             }
         ]
     },
@@ -52,7 +49,10 @@ module.exports={
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname,"app/index.tmpl.html")
         }),
-        new CleanWebpackPlugin()
+        new CleanWebpackPlugin(),
+        new MiniCssExtractPlugin({
+            filename:'[name].css'
+        })
     ],
     externals:{
         
