@@ -6,7 +6,7 @@ import React, { Component } from "react";
 // 地图类型选择器
 export default class MapTypeSelect extends Component {
 
-    // 还要传 map 参数，不会，在 app.js 里面写好了
+    // 丢弃：还要传 map 参数，不会，在 app.js 里面写好了
     switchingMaptype111(event) {
         console.log(event.target.value);   
     }

@@ -1,4 +1,5 @@
-.srarch{
+/* main.css */
+.search{
     font-size: 13px;
     padding-left: 7px;
     background: white;
@@ -20,7 +21,7 @@
     line-height: 15px;
     cursor: pointer;
   }
-  div.mapTool{
+.mapTool{
     position: absolute;
     margin: 5px;
     padding: 0px;

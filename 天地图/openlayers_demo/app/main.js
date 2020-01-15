@@ -2,19 +2,24 @@
 //import {onLoad} from ("./app.js") ? 这样可以吗  export { }   才用import？
 import {render} from 'react-dom';
 import React from 'react';
+
 import MapTypeSelect from './render/MapTypeSelect';
+import Indexhtml from './indexHtml.js';
 import './main.css';
 const {onLoad} = require("./app.js");
+
+//index.html
+render(
+    <Indexhtml />,
+    document.getElementById('root')
+);
 
 // 自定义样式地图类型控件，事件在 app.js 里面绑定
 render(
     <MapTypeSelect />,
     document.getElementById('mapTypeStyle')
-)
+);
 
-
-onLoad()
+onLoad();
 //import './app.js'
-
-
 

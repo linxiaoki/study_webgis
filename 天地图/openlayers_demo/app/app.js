@@ -263,10 +263,11 @@ function onLoad() {
     }
     
     //⊙⊙ 服务-搜索
+    /*
     var config = {
         pageCapacity: 10,
         onSearchComplete: localSearchResult //接收数据的回调函数
-    }
+    }*/
 }
 
 //⊙⊙ 以下是调用的方法
