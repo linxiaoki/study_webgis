@@ -83,6 +83,10 @@
       border: 0px;
       background: #f4f4ed;
     }
+
+    .row{
+      margin: 3px;
+    }
   </style>
 </head>
 
@@ -94,50 +98,50 @@
   </div>
   <div class="row">
     <div id="ToolBar" class="col-sm-4 col-md-3 hidden-xs">
-      <div id="MarkerClustererTool" class>
+      <div id="MarkerClustererTool" class="row">
         <button id="showMarkerClusterer">聚合点展示</button>
         <input type="text" id="info" value="test"></input>
       </div>
-      <div id="wmstool" class="mapTool">
+      <div id="wmstool" class="row">
         <input type="button" value="叠加超图WMS服务图层">
         <input type="button" value="删除超图WMS服务图层">
       </div>
-      <div id="rectTool" class="mapTool">
+      <div id="rectTool" class="row">
         <span>矩形工具</span>
         <input type="button" value="开启">
         <input type="button" value="关闭">
         <input type="button" value="清除">
       </div>
-      <div id="lineTool" class="mapTool">
+      <div id="lineTool" class="row">
         <span>折线工具</span>
         <input type="button" value="开启">
         <input type="button" value="关闭">
         <input type="button" value="清除">
       </div>
-      <div id="markerTool" class="mapTool">
+      <div id="markerTool" class="row">
         <span>标注工具</span>
         <input type="button" value="开启">
         <input type="button" value="关闭 ">
         <input type="button" value="编辑">
       </div>
-      <div id="polygonTool" class="mapTool">
+      <div id="polygonTool" class="row">
         <span>多边形工具</span>
         <input type="button" value="开启"><input type="button" value="关闭">
       </div>
-      <div id="circleTool" class="mapTool">
+      <div id="circleTool" class="row">
         <span>画圆工具</span>
         <input type="button" value="开启"><input type="button" value="关闭">
         <input type="text" name="" id="circleInfo">
       </div>
 
-      <div id="lineEditControl">
+      <div id="lineEditControl" class="row">
         <input id="enable" type="button" value="启动编辑">
         <input id="disable" type="button" value="禁止编辑">
       </div>
     </div>
 
 
-    <div id="mapDiv" class="col-xs-12 col-sm-8 col-md-9" style="height: 500px;">
+    <div id="mapDiv" class="col-xs-12 col-sm-8 col-md-9" style="height: 251px;">
       <div id="mapTypeStyle"></div>
       <div id="mapZoom">
         <div id="zoomIn">放大</div>
