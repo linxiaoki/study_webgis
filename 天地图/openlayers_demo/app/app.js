@@ -10,6 +10,7 @@ function onLoad() {
     map.centerAndZoom(new TLngLat(118.7912, 32.061), zoom);
     map.enableHandleMouseScroll(); // 启用滚轮缩放
     map.enableContinuousZoom(); // 启用缩放的效果
+    map.enableDoubleClickZoom(); // 双击放大
 
     //⊙⊙ 控件  control
     {
@@ -263,11 +264,58 @@ function onLoad() {
     }
     
     //⊙⊙ 服务-搜索
-    /*
+    
     var config = {
         pageCapacity: 10,
-        onSearchComplete: localSearchResult //接收数据的回调函数
-    }*/
+        onSearchComplete: (result)=>{//接收数据的回调函数
+            clearAll();
+            prompt(result);
+            // 1: 普通搜索，2：视野内搜索，3：普通建议词搜索
+            // 4：普通建议词搜索，5：公交规划建议词搜索
+            // 7：纯POI搜索(排除公交线)
+            switch(parseInt(result.getResultType())){
+                case 1:
+                    // 解析点数据结果
+                    pois(result.getPois());
+                    break;
+                case 2:
+                    // 解析推荐城市
+                    statistic(result.getStatistics())
+                    break;
+                case 3:
+                    // 解析行政区划边界
+                    area(result.getArea());
+                    break;
+                case 4:
+                    // 解析建议词信息
+                    suggest(result.getSuggests());
+                    break;
+                case 5:
+                    // 解析公交信息
+                    lineData(result.getLineData());
+                    break;
+            }
+            function prompt(obj){
+
+            }
+            // 解析点数据结果
+            function pois(obj){
+
+            }
+            // 显示信息框
+            function showPosition(marker,name,winHtml){
+
+            }
+            // 解析推荐城市
+            function statistics(obj){
+
+            }
+            // 解析行政区划边界
+            function area(obj){
+                
+            }
+        } 
+    }
 }
 
 //⊙⊙ 以下是调用的方法
