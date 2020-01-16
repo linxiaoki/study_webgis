@@ -66,87 +66,94 @@
       background: white
     }
 
-    #mapZoom>div {
-      margin: 3px;
-      font-size: 12px;
-      border: solid 2px blue;
-      background: #fff;
-      padding: 2px;
-      line-height: 15px;
-      cursor: pointer;
+    html,body{
+      height:100%;
     }
 
-    div.mapTool>div {
-      position: absolute;
-      margin: 5px;
-      padding: 0px;
-      border: 0px;
-      background: #f4f4ed;
+    .mapContent.row{
+      height: calc(100% - 128px);
     }
 
-    .row{
-      margin: 3px;
+    div#ToolBar div.row {
+      margin: 4px;
+      padding-bottom: 8px;
+    }
+
+    .btn-default:focus{
+      background-color: #fff;
+    }
+
+    div#mapZoom>button:focus{
+      background-color: #337ab7;
     }
   </style>
 </head>
 
-<body>
+<body class="container">
   <div class="row">
     <div class="page-header" style="text-align: center;">
       <h2>openlayers 入门 Demo</h2>
     </div>
   </div>
-  <div class="row">
-    <div id="ToolBar" class="col-sm-4 col-md-3 hidden-xs">
-      <div id="MarkerClustererTool" class="row">
-        <button id="showMarkerClusterer">聚合点展示</button>
-        <input type="text" id="info" value="test"></input>
+  <div class="mapContent row">
+    <div id="ToolBar" class="col-sm-4 col-md-3 hidden-xs panel panel-info" style="height: 100%; padding-left:0px;padding-right: 0px; margin-left:-15px;margin-right:15px;">
+      <div class="panel-heading">
+        <h3 class="panel-title">一堆按钮</h3>
       </div>
-      <div id="wmstool" class="row">
-        <input type="button" value="叠加超图WMS服务图层">
-        <input type="button" value="删除超图WMS服务图层">
-      </div>
-      <div id="rectTool" class="row">
-        <span>矩形工具</span>
-        <input type="button" value="开启">
-        <input type="button" value="关闭">
-        <input type="button" value="清除">
-      </div>
-      <div id="lineTool" class="row">
-        <span>折线工具</span>
-        <input type="button" value="开启">
-        <input type="button" value="关闭">
-        <input type="button" value="清除">
-      </div>
-      <div id="markerTool" class="row">
-        <span>标注工具</span>
-        <input type="button" value="开启">
-        <input type="button" value="关闭 ">
-        <input type="button" value="编辑">
-      </div>
-      <div id="polygonTool" class="row">
-        <span>多边形工具</span>
-        <input type="button" value="开启"><input type="button" value="关闭">
-      </div>
-      <div id="circleTool" class="row">
-        <span>画圆工具</span>
-        <input type="button" value="开启"><input type="button" value="关闭">
-        <input type="text" name="" id="circleInfo">
-      </div>
+      <div class="panel-body">
 
       <div id="lineEditControl" class="row">
-        <input id="enable" type="button" value="启动编辑">
-        <input id="disable" type="button" value="禁止编辑">
+        <input class="btn btn-default "  type="button" value="启动编辑">
+        <input class="btn btn-default " type="button" value="禁止编辑">
+      </div>
+      <div id="MarkerClustererTool" class="row">
+        <button class="btn btn-default "  id="showMarkerClusterer">聚合点展示</button>
+      </div>
+      <div class="row">
+        <span>当前坐标：</span>
+        <input type="text" id="info" placeholder="坐标"></input>
+      </div>
+      <div id="wmstool" class="row">
+        <input class="btn btn-default " type="button" value="叠加超图WMS服务图层"><br/>
+        <input class="btn btn-default " type="button" value="删除超图WMS服务图层">
+      </div>
+      <div id="rectTool" class="row">
+        <span>矩形工具：</span>
+        <input class="btn btn-default " type="button" value="开启">
+        <input class="btn btn-default " type="button" value="关闭">
+        <input class="btn btn-default " type="button" value="清除">
+      </div>
+      <div id="lineTool" class="row">
+        <span>折线工具：</span>
+        <input class="btn btn-default " type="button" value="开启">
+        <input class="btn btn-default " type="button" value="关闭">
+        <input class="btn btn-default " type="button" value="清除">
+      </div>
+      <div id="markerTool" class="row">
+        <span>标注工具：</span>
+        <input class="btn btn-default " type="button" value="开启">
+        <input class="btn btn-default " type="button" value="关闭 ">
+        <input class="btn btn-default " type="button" value="编辑">
+      </div>
+      <div id="polygonTool" class="row">
+        <span>多边形工具：</span>
+        <input class="btn btn-default " type="button" value="开启">
+        <input class="btn btn-default " type="button" value="关闭">
+      </div>
+      <div id="circleTool" class="row">
+        <span>画圆工具：</span>
+        <input class="btn btn-default " type="button" value="开启">
+        <input class="btn btn-default " type="button" value="关闭"><br />
+        <input type="text" name="" id="circleInfo" style="margin:3px 0px 0px 73px; width:130px">
       </div>
     </div>
-
-
-    <div id="mapDiv" class="col-xs-12 col-sm-8 col-md-9" style="height: 251px;">
-      <div id="mapTypeStyle"></div>
-      <div id="mapZoom">
-        <div id="zoomIn">放大</div>
-        <div id="zoomOut">缩小</div>
-      </div>
+    </div>
+    <div id="mapDiv" class="ccol-sm-8 col-md-9" style="height: 100%;border: 1px solid #999999">
+    </div>
+    <div id="mapTypeStyle"></div>
+    <div id="mapZoom" class="btn-group-vertical">
+      <button id="zoomIn" class="btn btn-primary btn-xs" >放大</button>
+      <button id="zoomOut" class="btn btn-primary btn-xs" >缩小</button>
     </div>
   </div>
 </body>

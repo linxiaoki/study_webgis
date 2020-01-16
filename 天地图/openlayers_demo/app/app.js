@@ -19,8 +19,8 @@ function onLoad() {
     // 自定义控件1 - 地图类型选择
     jQuery('#mapTypeSelect').on("change", switchingMapType); // 添加 change 事件
     var mapTypeControl = new THtmlElementControl(jQuery("#mapTypeStyle")[0]);
-    mapTypeControl.setLeft(30);
-    mapTypeControl.setTop(50);
+    mapTypeControl.setLeft(90);
+    mapTypeControl.setTop(60);
     map.addControl(mapTypeControl);
 
     // 自定义控件2 - 地图缩放
@@ -31,8 +31,8 @@ function onLoad() {
         map.zoomOut();
     })
     var zoomControl = new THtmlElementControl(document.getElementById("mapZoom"))
-    zoomControl.setLeft(130);
-    zoomControl.setTop(50);
+    zoomControl.setLeft(220);
+    zoomControl.setTop(60);
     map.addControl(zoomControl)
     }
 
@@ -54,8 +54,8 @@ function onLoad() {
         strokeStyle: "dashed"
     });
     map.addOverLay(line);
-    jQuery("div#lineEditControl>input#enable").click(() => line.enableEdit());
-    jQuery("div#lineEditControl>input#disable").click(() => line.disableEdit());
+    jQuery(jQuery("div#lineEditControl>input")[0]).click(() => line.enableEdit());
+    jQuery(jQuery("div#lineEditControl>input")[1]).click(() => line.disableEdit());
 
     // 给 marker 添加 label
     addMarkerAndInfo(new TLngLat(118.46125, 32.072),"自定义信息1：");
@@ -263,10 +263,11 @@ function onLoad() {
     }
     
     //⊙⊙ 服务-搜索
+    /*
     var config = {
         pageCapacity: 10,
         onSearchComplete: localSearchResult //接收数据的回调函数
-    }
+    }*/
 }
 
 //⊙⊙ 以下是调用的方法
@@ -275,8 +276,8 @@ function onLoad() {
 function addControls() {
     var navigation_control = new TNavigationControl({
         type: "TMAP_NAVIGATION_CONTROL_LARGE",
-        anchor: "TMAP_ANCHOR_TOP_LEFT",
-        offset: [0, 50],
+        anchor: "TMAP_ANCHOR_TOP_RIGHT",
+        offset: [30, 50],
         showZoomInfo: true
     });
     var overview_control = new TOverviewMapControl({

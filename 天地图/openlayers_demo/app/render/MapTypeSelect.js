@@ -13,7 +13,7 @@ export default class MapTypeSelect extends Component {
     // 渲染
     render() {
         return (
-            <select id="mapTypeSelect">
+            <select id="mapTypeSelect" class="form-control">
                 <option value="TMAP_NORMAL_MAP">地图</option>
                 <option value="TMAP_SATELLITE_MAP">卫星</option>
                 <option value="TMAP_HYBRID_MAP">卫星混合</option>
