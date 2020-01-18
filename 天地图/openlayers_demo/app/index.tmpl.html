@@ -72,7 +72,7 @@
     }
 
     .mapContent.row {
-      height: calc(100% - 128px);
+      height: calc(100% - 135px);
     }
 
     div#ToolBar div.row {
@@ -96,8 +96,48 @@
     </div>
   </div>
   <div class="mapContent row">
+    <div id="mapDiv" class="ccol-sm-8 col-md-9" style="height: 100%;border: 1px solid #999999;">
+    </div>
+    <div id="customTool">
+      <div id="mapTypeStyle"></div>
+      <div id="mapZoom" class="btn-group-vertical">
+        <button id="zoomIn" class="btn btn-primary btn-xs">放大</button>
+        <button id="zoomOut" class="btn btn-primary btn-xs">缩小</button>
+      </div>
+      <div id="search_tool" style="position:fixed;top:130px;right:370px;">
+        <!--搜索面板-->
+        <div class="search">
+          <input type="text" id="keywords" value="KFC" style="border:0px solid #999999;font-size:large">
+          <input type="button" id="searchBtn" value="搜索">
+        </div>
+        <br/>
+        <!--提示词面板-->
+        <div id="promptDiv" class="prompt"></div>
+        <!--统计面板-->
+        <div id="statisticsDiv" class="statistics"></div>
+        <!-- 建议词面板 -->
+        <div id="suggestsDiv" class="suggests"></div>
+        <!-- 公交提示面板 -->
+        <div id="lineDataDiv" class="lineData"></div>
+        <!--搜索结果面板-->
+        <div id="resultDiv" class="result">
+          <div id="searchDiv"></div>
+          <div id="pageDiv">
+            <input type="button" value="第一页">
+            <input type="button" value="上一页" >
+            <input type="button" value="下一页" >
+            <input type="button" value="最后一页" >
+            <br>
+            转到第<input type="text" name="" id="pageId" value="1" size="3">页
+            <input type="button" value="转到">
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div id="ToolBar" class="col-sm-4 col-md-3 hidden-xs panel panel-info"
-      style="height: 100%; padding-left:0px;padding-right: 0px; margin-left:-15px;margin-right:15px;">
+      style="height: 100%; padding-left:0px;padding-right: 0px; margin-left:15px;margin-right:-15px;overflow:scroll">
       <div class="panel-heading">
         <h3 class="panel-title">一堆按钮</h3>
       </div>
@@ -119,6 +159,7 @@
           <input class="btn btn-default " type="button" value="删除超图WMS服务图层">
         </div>
         </div>
+        <hr style="border-top:1px solid #4e4c4c27"/>
         <div id="rectTool" class="row">
           <span>矩形工具：</span>
           <div class="btn-group">
@@ -158,42 +199,13 @@
           </div>
           <input type="text" id="circleInfo" style="margin:3px 0px 0px 73px; width:130px">
         </div>
-        <div class="test">
-          <!--搜索面板-->
-          <div class="search">
-            <input type="text" id="keywords" value="KFC" style="border:0px solid #999999;font-size:large">
-            <input type="button" id="searchBtn" value="搜索">
-          </div>
-          <br>
-          <!--提示词面板-->
-          <div id="promptDiv" class="prompt"></div>
-          <!--统计面板-->
-          <div id="statisticsDiv" class="statistics"></div>
-          <!--搜索结果面板-->
-          <div id="resultDiv" class="result">
-            <div id="searchDiv"></div>
-            <div id="pageDiv">
-              <input type="button" value="第一页" onClick="localsearch.firtPage()">
-              <input type="button" value="上一页" onClick="localsearch.previousPage()">
-              <input type="button" value="下一页" onClick="localsearch.nextPage()">
-              <input type="button" value="最后一页" onClick="localsearch.lastPage()">
-              <br>
-              转到第<input type="text" name="" id="pageId" value="1" size="3">页
-              <input type="button" onClick="localsearch.goto" value="转到">
-            </div>
-          </div>
-        </div>
+        <hr style="border-top:1px solid #4e4c4c27"/>
+
         
       </div>
     </div>
 
-    <div id="mapDiv" class="ccol-sm-8 col-md-9" style="height: 100%;border: 1px solid #999999">
-    </div>
-    <div id="mapTypeStyle"></div>
-    <div id="mapZoom" class="btn-group-vertical">
-      <button id="zoomIn" class="btn btn-primary btn-xs">放大</button>
-      <button id="zoomOut" class="btn btn-primary btn-xs">缩小</button>
-    </div>
+
   </div>
 </body>
 

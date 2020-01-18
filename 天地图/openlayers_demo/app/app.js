@@ -264,12 +264,38 @@ function onLoad() {
     }
 
     //⊙⊙ 服务-搜索
-
+    {
     var config = {
         pageCapacity: 10,
         onSearchComplete: localSearchResult //接收数据的回调函数 
     };
     localsearch = new TLocalSearch(map, config); // 创建搜索对象
+    // 自定义搜索控件
+    var searchControl = new THtmlElementControl(jQuery("div#search_tool")[0]);
+    searchControl.setRight(20);
+    searchControl.setTop(20);
+    map.addControl(searchControl);
+    // html 按钮绑定事件
+    jQuery("div.search>input[type=button]").click(function(){
+        localsearch.search(jQuery("div.search>input")[0].value); // 搜索
+    });
+    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[0]).click(()=>{
+        localsearch.firstPage(); // 第一页
+    });
+    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[1]).click(()=>{
+        localsearch.previousPage(); // 上一页
+    });
+    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[2]).click(()=>{
+        console.log("下一")
+        localsearch.nextPage();  // 下一页
+    });
+    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[3]).click(()=>{
+        localsearch.lastPage();  // 最后一页
+    });
+    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[4]).click(()=>{
+        localsearch.gotoPage(parseInt(jQuery("div#pageDiv>input#pageId").val()));  // 转到 n 页
+    });
+
 
 
     // 接收数据的回调函数
@@ -286,7 +312,7 @@ function onLoad() {
                 break;
             case 2:
                 // 解析推荐城市
-                statistic(result.getStatistics())
+                statistics(result.getStatistics())
                 break;
             case 3:
                 // 解析行政区划边界
@@ -294,12 +320,26 @@ function onLoad() {
                 break;
             case 4:
                 // 解析建议词信息
-                suggest(result.getSuggests());
+                suggests(result.getSuggests());
                 break;
             case 5:
                 // 解析公交信息
                 lineData(result.getLineData());
                 break;
+        }
+        // 清空地图及搜索列表
+        function clearAll(){
+            map.clearOverLays();
+            document.getElementById("searchDiv").innerHTML="";
+            document.getElementById("resultDiv").style.display="none";
+            document.getElementById("statisticsDiv").innerHTML="";
+            document.getElementById("statisticsDiv").style.display="none";
+            document.getElementById("promptDiv").innerHTML="";
+            document.getElementById("promptDiv").style.display="none";
+            document.getElementById("suggestsDiv").innerHTML="";
+            document.getElementById("suggestsDiv").style.display="none";
+            document.getElementById("lineDataDiv").innerHTML="";
+            document.getElementById("lineDataDiv").style.display="none";
         }
 
         //在 #promptDiv 节点上 添加提示词
@@ -307,7 +347,7 @@ function onLoad() {
             //var prompts = obj.getPrompt(); // 返回提示信息
             if (prompts) {
                 var promptHtml = "";
-console.log("prompts length: "+ string(prompts.length))
+console.log("prompts length: "+ prompts.length)
                 for (var i = 0; i < prompts.length; i++) {
                     /**prompt 结构
                      * 
@@ -320,7 +360,7 @@ console.log("prompts length: "+ string(prompts.length))
                      * type=2 时，一般提示为"在 XXX 没有搜索到相关的结果"  (没有结果，查找其他)
                      * type=3 时，一般会列出查询的多个结果，点击结果即可完成行政区跳转 (列出结果)
                      */
-                    var prompt = promprs[i];
+                    var prompt = prompts[i];
                     var promptType = prompt.type;
                     var promptAdmins = prompt.admins;
                     var meanprompt = prompt.DidYouMean;
@@ -329,7 +369,7 @@ console.log("Did you Mead:>"+prompt.DidYouMean);
                         promptHtml +=`<p>您是否要在<strong>${promptAdmins[0].name}</strong>搜索更多包含<strong>${obj.getKeyword()}</strong>的相关内容？</p>`;
                     }else if(promptType==2){
                         promptHtml+=`<p>在<strong>${promptAdmins[0].name}</strong>没有搜索到与<strong>${obj.getKeyword()}</strong>相关的结果。</p>`;
-                        if(meanprompt){// 没有找到提供搜索建议
+                        if(meanprompt){// 自定义弹出的？ did you mean prompt: 没有找到提供搜索建议
                             promptHtml+=`<p>您是否要找：<font weight='bold' color='#035fbe><strong>${meanprompt}</strong></font></p>`;
                         }
                     }else if(promptType==3){
@@ -352,21 +392,21 @@ console.log("Did you Mead:>"+prompt.DidYouMean);
         function pois(pts) {
             if(pts){
                 var divMarker=document.createElement("div")
-                var zoomArr=[]; //坐标数组，设置最佳比例尺会用到
-// 之后再改：let
+                var pointArr=[]; //坐标数组，设置最佳比例尺会用到
+// 之后再改：let，关于闭包
                 for(var i=0;i<pts.length;i++){
 // 闭包的作用在哪呢？不用闭包尝试
                     // 闭包
                     (function(n){
-                        console.log("正在执行闭包。。。-"+n)
+                        console.log("正在执行闭包。。。"+n)
                         var name = pts[n].name; //名称
                         var address = pts[n].address; //地址
                         var lnglatArr = pts[n].lonlat.split(" "); //坐标
                         var lnglat = new TLngLat(lnglatArr[0],lnglatArr[1]);
-                        zoomArr.push(lnglat);
+                        pointArr.push(lnglat);
                         //地图上添加标注点，并注册点击事件
                         var marker = new TMarker(lnglat);
-                        map.addOVerLay(marker); 
+                        map.addOverLay(marker); 
                         TEvent.bind(marker,'click',function(){
                             var info = this.openInfoWinHtml("地址"+address);
                             info.setTitle(name);
@@ -386,23 +426,20 @@ console.log("Did you Mead:>"+prompt.DidYouMean);
                     })(i)
                 }
                 // 显示地图的最佳级别
-                map.setViewPort(zoomArr);
+                map.setViewport(pointArr);
                 //显示搜索结果
                 divMarker.appendChild(document.createTextNode(` 共${localsearch.getCountNumber()
-                }条记录，分${localsearch.getCountPage()}页，当前第${localseach.getPageIndex()}页`));
-                document.getElementById('searchDiv').appendChild(divMarder);
+                }条记录，分${localsearch.getCountPage()}页，当前第${localsearch.getPageIndex()}页`));
+                document.getElementById('searchDiv').appendChild(divMarker);
                 document.getElementById('resultDiv').style.display="block";
             }
         }
 
-// 删除，已经写在匿名函数里面了？？？显示信息框
-        function showPosition(marker, name, winHtml) {
-
-        }
         // 解析推荐城市
         function statistics(obj) {
             if(obj){
-                var pointArr=[]; // 用来设置最佳比例尺
+// pointArr 没用？
+
                 var priorityCityHtml="";
                 var allAdminsHtml="";
                 var priorityCitys = obj.priorityCitys;
@@ -412,24 +449,82 @@ console.log("Did you Mead:>"+prompt.DidYouMean);
                     priorityCityHtml += priorityCitys.map((city)=>{
                         return `<li>${city.name}(${city.count})</li>`
                     }).join("");
+//删除------------- 
 console.log(riorityCitys.map((city)=>{
     return `<li>${city.name}(${city.count})</li>`
 }).join(""))
+//到这--------------
                     priorityCityHtml+="</ul>";
                 }
                 var allAdmins = obj.allAdmins;
                 if(allAdmins){
                     addAdminsHtml +="更多城市<ul>";
                     for(var i=0;i<allAdmins.length;i++){
-                        allAdminsHtml+=`<li>${alladminss[i].name}()</li`
-                    } 
+                        allAdminsHtml+=`<li>${alladmins[i].name}(${alladmins[i].count})`
+                        var childAdmins = allAdmins[i].childAdmins;
+                        allAdminsHtml+=childAdmins?childAdmins.map((childadmin_item)=>{
+                            return `<blockquote>${childadmin_item.name}(${childadmin_item.count})</blockquote>`;
+                        }).join(""):""+"</li>";
+                    }
+                    alladminsHtml+="</ul>"
                 }
+                document.getElementById("statisticsDiv").style.display="block";
+                document.getElementById("statisticsDiv").innerHTML=priorityCityHtml+alladminsHtml;
             }
         }
+
         // 解析行政区划边界
         function area(obj) {
-            
+            if(obj){
+                var pointArr=[];
+                var points=obj.points;
+                for(var i=0;i<points.length;i++){
+                    var regionLngLats = [];
+                    var regionArr = points[i].region.split(",");
+                    for(var j=0;j<regionArr.length;j++){
+                        var lnglat=new TLngLat(regionArr[j].split(" ")[0],regionArr[j].split(" ")[1]);
+                        regionLngLats.push(lnglat);
+                        pointsArr.push(lnglat);
+                    }
+                    // 创建线对象
+                    var line = new TPolyline(regionLngLatss,{
+                        strokeColor: "blue",
+                        strokeWeight: 3,
+                        //strokeOpacity: 1,
+                        strokeStyle: "dashed"
+                    });
+                    // 向地图上添加线
+                    map.addOverLay(line);
+                    // 显示最佳比例尺
+                    map.setViewport(pointsArr);
+                }
+            }   
         }
+
+        // 解析建议词信息
+        function suggests(obj){
+            if(obj){
+                // 建议词提示，如果搜索类型为公交规划建议词(type=?5?)或公交站(type=?7?)搜索时，返回结果为公交信息的建议词
+                var suggestsHtml="建议词提示<ul>"+obj.map((suggest_item)=>{
+                    return `<li>${suggest_item.name}&nbsp;&nbsp;<font style="color:#666666">${suggest_item.address}</font></li>`
+                }).join("")+"/ul";
+                document.getElementById("suggestsDiv").style.display="block";
+                document.getElementById("suggestsDiv").innerHTML=suggestsHtml;
+            }
+        }
+
+        // 解析公交信息
+        function lineData(obj){
+            if(obj){
+                //公交提示
+                var lineDataHtml ="公交提示<ur>"+obj.map((station)=>{
+                    return `<li>${station.name}+&nbsp;%nbsp;<font style="color:#666666">共${station.stationNum}站</font></li>`;
+                }).join("")+"/ul";
+                document.getElementById("lineDataDiv").style.display="block";
+                document.getElementById("lineDataDiv").innerHTML=lineDataHtml;
+            }
+        }
+    }
     }
 }
 
