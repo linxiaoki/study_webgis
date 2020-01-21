@@ -7,7 +7,7 @@ function onLoad() {
         projection: "EPSG:4326"  //900913  或  4326
     });
 
-    map.centerAndZoom(new TLngLat(118.7912, 32.061), zoom);
+    map.centerAndZoom(new TLngLat(118.7912, 32.061), zoom);  //116.40969,39.89945  北京，可以搜索天安门？
     map.enableHandleMouseScroll(); // 启用滚轮缩放
     map.enableContinuousZoom(); // 启用缩放的效果
     map.enableDoubleClickZoom(); // 双击放大
@@ -277,7 +277,7 @@ function onLoad() {
     map.addControl(searchControl);
     // html 按钮绑定事件
     jQuery("div.search>input[type=button]").click(function(){
-        localsearch.search(jQuery("div.search>input")[0].value); // 搜索
+        localsearch.search(jQuery("div.search>input#keywords").val()); // 搜索
     });
     jQuery(jQuery("div#resultDiv>div#pageDiv>input")[0]).click(()=>{
         localsearch.firstPage(); // 第一页
@@ -286,22 +286,22 @@ function onLoad() {
         localsearch.previousPage(); // 上一页
     });
     jQuery(jQuery("div#resultDiv>div#pageDiv>input")[2]).click(()=>{
-        console.log("下一")
         localsearch.nextPage();  // 下一页
     });
     jQuery(jQuery("div#resultDiv>div#pageDiv>input")[3]).click(()=>{
         localsearch.lastPage();  // 最后一页
     });
-    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[4]).click(()=>{
+    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[5]).click(()=>{
         localsearch.gotoPage(parseInt(jQuery("div#pageDiv>input#pageId").val()));  // 转到 n 页
     });
-
 
 
     // 接收数据的回调函数
     function localSearchResult(result) {
         clearAll();  // 清空地图及搜索列表
-        addPromptHtml(result.getPrompt()); // 添加提示词（在 #promptDiv 节点上）
+        console.log(result);
+        console.log("query type:",result.getResultType());
+        addPromptHtml(result); // 添加提示词（在 #promptDiv 节点上）
         // 1: 普通搜索，2：视野内搜索，3：普通建议词搜索
         // 4：普通建议词搜索，5：公交规划建议词搜索
         // 7：纯POI搜索(排除公交线)
@@ -343,11 +343,11 @@ function onLoad() {
         }
 
         //在 #promptDiv 节点上 添加提示词
-        function addPromptHtml(prompts) {
+        function addPromptHtml(obj) {
             //var prompts = obj.getPrompt(); // 返回提示信息
+            var prompts=obj.getPrompt();
             if (prompts) {
                 var promptHtml = "";
-console.log("prompts length: "+ prompts.length)
                 for (var i = 0; i < prompts.length; i++) {
                     /**prompt 结构
                      * 
@@ -363,27 +363,30 @@ console.log("prompts length: "+ prompts.length)
                     var prompt = prompts[i];
                     var promptType = prompt.type;
                     var promptAdmins = prompt.admins;
+
                     var meanprompt = prompt.DidYouMean;
-console.log("Did you Mead:>"+prompt.DidYouMean);
                     if(promptType==1){
                         promptHtml +=`<p>您是否要在<strong>${promptAdmins[0].name}</strong>搜索更多包含<strong>${obj.getKeyword()}</strong>的相关内容？</p>`;
                     }else if(promptType==2){
                         promptHtml+=`<p>在<strong>${promptAdmins[0].name}</strong>没有搜索到与<strong>${obj.getKeyword()}</strong>相关的结果。</p>`;
-                        if(meanprompt){// 自定义弹出的？ did you mean prompt: 没有找到提供搜索建议
+                        if(meanprompt){// 自定义弹出的？ did you mean prompt: 没有找到提供搜索建议?
+                            console.log("meanprompt 有值>>>>>>");
                             promptHtml+=`<p>您是否要找：<font weight='bold' color='#035fbe><strong>${meanprompt}</strong></font></p>`;
                         }
                     }else if(promptType==3){
                         promptHtml+=`<p style='margin-bottom:3px;'>有以下相关结果，您是否要找：</p>`
                         for(i=0;i<promptAdmins.length;i++){
                             promptHtml+=`<p>${promptAdmins[i].name}</p>`;
-
                         }
                     }
                 }
                 if(promptHtml != ""){
+                    console.log(promptHtml);
 // !!!之后再改 $("#promptDiv")
                     document.getElementById("promptDiv").style.display="block";
                     document.getElementById("promptDiv").innerHTML=promptHtml
+                }else{
+                    console.log("promptHtml == ''",promptHtml);
                 }
             }
         }
@@ -393,38 +396,36 @@ console.log("Did you Mead:>"+prompt.DidYouMean);
             if(pts){
                 var divMarker=document.createElement("div")
                 var pointArr=[]; //坐标数组，设置最佳比例尺会用到
-// 之后再改：let，关于闭包
-                for(var i=0;i<pts.length;i++){
-// 闭包的作用在哪呢？不用闭包尝试
-                    // 闭包
-                    (function(n){
-                        console.log("正在执行闭包。。。"+n)
-                        var name = pts[n].name; //名称
-                        var address = pts[n].address; //地址
-                        var lnglatArr = pts[n].lonlat.split(" "); //坐标
-                        var lnglat = new TLngLat(lnglatArr[0],lnglatArr[1]);
-                        pointArr.push(lnglat);
-                        //地图上添加标注点，并注册点击事件
-                        var marker = new TMarker(lnglat);
-                        map.addOverLay(marker); 
-                        TEvent.bind(marker,'click',function(){
-                            var info = this.openInfoWinHtml("地址"+address);
-                            info.setTitle(name);
-                        });
-                        //页面显示搜索到列表
-                        var a = document.createElement("a");
-                        a.href="javascript://";
-                        a.innerHTML=name;
-                        a.onclick=()=>{
-                            // 显示信息框
-                            var info = marker.openInfoWinHtml(winHtml);
-                            info.setTitle(name);
-                        };
-                        divMarker.appendChild(document.createTextNode((i+1)+"."));
-                        divMarker.appendChild(a);
-                        divMarker.appendChild(document.createElement("br"));
-                    })(i)
-                }
+                // 源码里面是在for循环内使用闭包，为了每个点都执行函数，用 arr.forEach 替代
+                pts.forEach((ptItem,index)=>{
+                    var name = ptItem.name; //名称
+                    var address = ptItem.address; // 地址
+                    var lnglatArr = ptItem.lonlat.split(" "); // 坐标
+                    var lnglat = new TLngLat(lnglatArr[0],lnglatArr[1]);
+                    pointArr.push(lnglat);
+                    // 地图上添加标注点，并注册点击事件
+                    var marker = new TMarker(lnglat);
+                    map.addOverLay(marker);
+                    // 原为：bind(marker,'click',marker,function(){})  
+                    // bind 多了一个参数marker,是因为 marker[1] 注册'click'事件；marker[2] 执行function，并且 this 指向 marker[2] 吗？
+                    TEvent.addListener(marker,'click',function(){
+                        var info = this.openInfoWinHtml("地址"+address);
+                        info.setTitle(name);
+                    });
+                    // 页面显示搜索到列表
+                    var a = document.createElement("a");
+                    //a.href="javascript://";
+                    a.innerHTML=name;
+                    a.onclick=function(){
+                        // 显示信息框
+                        var info = marker.openInfoWinHtml("地址"+address);
+                        info.setTitle(name);
+                    };
+                    divMarker.appendChild(document.createTextNode((index + 1)+"."));
+                    divMarker.appendChild(a);
+                    divMarker.appendChild(document.createElement("br"));0
+                })
+
                 // 显示地图的最佳级别
                 map.setViewport(pointArr);
                 //显示搜索结果
@@ -439,9 +440,11 @@ console.log("Did you Mead:>"+prompt.DidYouMean);
         function statistics(obj) {
             if(obj){
 // pointArr 没用？
-
                 var priorityCityHtml="";
                 var allAdminsHtml="";
+                console.log(">>>>>>>");
+                console.log(obj);
+                console.log(priorityCitys);
                 var priorityCitys = obj.priorityCitys;
                 if(priorityCitys){
                     //推荐城市显示
@@ -449,30 +452,28 @@ console.log("Did you Mead:>"+prompt.DidYouMean);
                     priorityCityHtml += priorityCitys.map((city)=>{
                         return `<li>${city.name}(${city.count})</li>`
                     }).join("");
-//删除------------- 
-console.log(riorityCitys.map((city)=>{
-    return `<li>${city.name}(${city.count})</li>`
-}).join(""))
-//到这--------------
                     priorityCityHtml+="</ul>";
                 }
                 var allAdmins = obj.allAdmins;
                 if(allAdmins){
-                    addAdminsHtml +="更多城市<ul>";
+                    // function  jQuery('div#statisticsi>ul#readmore').slideToggle('slow');
+                    allAdminsHtml +=`<a onclick=function(){}>更多城市</a><ul id='readmore'>`; //  可以添加一个动作 slideup/slidedown, 现实和隐藏
                     for(var i=0;i<allAdmins.length;i++){
-                        allAdminsHtml+=`<li>${alladmins[i].name}(${alladmins[i].count})`
+                        allAdminsHtml+=`<li>${allAdmins[i].name}(${allAdmins[i].count})`;
+                        // childAdmins  省里面的市？
                         var childAdmins = allAdmins[i].childAdmins;
                         allAdminsHtml+=childAdmins?childAdmins.map((childadmin_item)=>{
                             return `<blockquote>${childadmin_item.name}(${childadmin_item.count})</blockquote>`;
                         }).join(""):""+"</li>";
                     }
-                    alladminsHtml+="</ul>"
+                    allAdminsHtml+="</ul>"
+                    
                 }
                 document.getElementById("statisticsDiv").style.display="block";
-                document.getElementById("statisticsDiv").innerHTML=priorityCityHtml+alladminsHtml;
+                document.getElementById("statisticsDiv").innerHTML=priorityCityHtml+allAdminsHtml;
             }
         }
-
+ 
         // 解析行政区划边界
         function area(obj) {
             if(obj){
@@ -652,9 +653,7 @@ function addMarkerAndInfo(lnglat_, text) {
     });
 
     map.addOverLay(marker);
-    TEvent.addListener(marker, "click", onClick); // 注册标注的点击时间
-
-    function onClick() {
+    TEvent.addListener(marker, "click", function(){
         // 给labelClose 的 id 加上时间戳，这样添加多个 merkerAndInfo的时候，不会一起触发关闭事件
         var timestamp = new Date().getTime();
         debugger;
@@ -703,7 +702,7 @@ function addMarkerAndInfo(lnglat_, text) {
         jQuery("span#labelClose" + timestamp).click(() => {  // 在 addOverLay 后，绑定关闭的事件
             map.removeOverLay(customerInfoLabel);
         });
-    }
+    }); 
 }
 
 // 聚合Marker

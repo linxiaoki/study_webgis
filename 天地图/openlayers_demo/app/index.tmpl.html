@@ -86,7 +86,20 @@
     div#mapZoom>button:focus {
       background-color: #337ab7;
     }
+
   </style>
+  <script>
+    $(function () {
+      jQuery('div.search>input#keywords').keypress(function (e) {
+        var keyCode = e.keyCode || window.event.keyCode || e.which;
+        if (event.keyCode == "13") {
+          jQuery('div.search>input#searchBtn').click();
+        }
+      });
+    });
+
+
+  </script>
 </head>
 
 <body class="container">
@@ -96,7 +109,7 @@
     </div>
   </div>
   <div class="mapContent row">
-    <div id="mapDiv" class="ccol-sm-8 col-md-9" style="height: 100%;border: 1px solid #999999;">
+    <div id="mapDiv" class="col-sm-8 col-md-9 " style="height: 100%;border: 1px solid #999999;">
     </div>
     <div id="customTool">
       <div id="mapTypeStyle"></div>
@@ -110,11 +123,11 @@
           <input type="text" id="keywords" value="KFC" style="border:0px solid #999999;font-size:large">
           <input type="button" id="searchBtn" value="搜索">
         </div>
-        <br/>
+        <br />
         <!--提示词面板-->
         <div id="promptDiv" class="prompt"></div>
         <!--统计面板-->
-        <div id="statisticsDiv" class="statistics"></div>
+        <div id="statisticsDiv" class="statistics" style="height:300px;"></div>
         <!-- 建议词面板 -->
         <div id="suggestsDiv" class="suggests"></div>
         <!-- 公交提示面板 -->
@@ -124,9 +137,9 @@
           <div id="searchDiv"></div>
           <div id="pageDiv">
             <input type="button" value="第一页">
-            <input type="button" value="上一页" >
-            <input type="button" value="下一页" >
-            <input type="button" value="最后一页" >
+            <input type="button" value="上一页">
+            <input type="button" value="下一页">
+            <input type="button" value="最后一页">
             <br>
             转到第<input type="text" name="" id="pageId" value="1" size="3">页
             <input type="button" value="转到">
@@ -137,7 +150,7 @@
 
 
     <div id="ToolBar" class="col-sm-4 col-md-3 hidden-xs panel panel-info"
-      style="height: 100%; padding-left:0px;padding-right: 0px; margin-left:15px;margin-right:-15px;overflow:scroll">
+      style="height: 100%; padding-left:0px;padding-right: 0px; margin-left:15px;margin-right:-15px;overflow-y:scroll">
       <div class="panel-heading">
         <h3 class="panel-title">一堆按钮</h3>
       </div>
@@ -155,53 +168,51 @@
         </div>
         <div id="wmstool" class="row ">
           <div class="btn-group-vertical">
-          <input class="btn btn-default " type="button" value="叠加超图WMS服务图层">
-          <input class="btn btn-default " type="button" value="删除超图WMS服务图层">
+            <input class="btn btn-default " type="button" value="叠加超图WMS服务图层">
+            <input class="btn btn-default " type="button" value="删除超图WMS服务图层">
+          </div>
         </div>
-        </div>
-        <hr style="border-top:1px solid #4e4c4c27"/>
+        <hr style="border-top:1px solid #4e4c4c27" />
         <div id="rectTool" class="row">
           <span>矩形工具：</span>
           <div class="btn-group">
-          <input class="btn btn-default " type="button" value="开启">
-          <input class="btn btn-default " type="button" value="关闭">
-          <input class="btn btn-default " type="button" value="清除">
-        </div>
+            <input class="btn btn-default " type="button" value="开启">
+            <input class="btn btn-default " type="button" value="关闭">
+            <input class="btn btn-default " type="button" value="清除">
+          </div>
         </div>
         <div id="lineTool" class="row">
           <span>折线工具：</span>
           <div class="btn-group">
-          <input class="btn btn-default " type="button" value="开启">
-          <input class="btn btn-default " type="button" value="关闭">
-          <input class="btn btn-default " type="button" value="清除">
-        </div>
+            <input class="btn btn-default " type="button" value="开启">
+            <input class="btn btn-default " type="button" value="关闭">
+            <input class="btn btn-default " type="button" value="清除">
+          </div>
         </div>
         <div id="markerTool" class="row">
           <span>标注工具：</span>
           <div class="btn-group">
-          <input class="btn btn-default " type="button" value="开启">
-          <input class="btn btn-default " type="button" value="关闭 ">
-          <input class="btn btn-default " type="button" value="编辑">
+            <input class="btn btn-default " type="button" value="开启">
+            <input class="btn btn-default " type="button" value="关闭 ">
+            <input class="btn btn-default " type="button" value="编辑">
           </div>
         </div>
         <div id="polygonTool" class="row">
           <span>多边形工具：</span>
           <div class="btn-group">
-          <input class="btn btn-default " type="button" value="开启">
-          <input class="btn btn-default " type="button" value="关闭">
-        </div>
+            <input class="btn btn-default " type="button" value="开启">
+            <input class="btn btn-default " type="button" value="关闭">
+          </div>
         </div>
         <div id="circleTool" class="row">
           <span>画圆工具：</span>
           <div class="btn-group">
-          <input class="btn btn-default " type="button" value="开启">
-          <input class="btn btn-default " type="button" value="关闭">
+            <input class="btn btn-default " type="button" value="开启">
+            <input class="btn btn-default " type="button" value="关闭">
           </div>
           <input type="text" id="circleInfo" style="margin:3px 0px 0px 73px; width:130px">
         </div>
-        <hr style="border-top:1px solid #4e4c4c27"/>
-
-        
+        <hr style="border-top:1px solid #4e4c4c27" />
       </div>
     </div>
 
