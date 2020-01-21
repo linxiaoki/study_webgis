@@ -199,8 +199,8 @@ function onLoad() {
         // 触发：多边形工具打开
         jQuery("div#polygonTool").click((ev) => {
             var ev = ev || window.event;
-            console.log("test window event");
-            console.log(window.event);
+            //console.log("test window event");
+            //console.log(window.event);
             var target = ev.target || ev.srcElement;
             if (target.nodeName.toLocaleLowerCase() == "input") {
                 switch (target.defaultValue) {
@@ -299,8 +299,8 @@ function onLoad() {
     // 接收数据的回调函数
     function localSearchResult(result) {
         clearAll();  // 清空地图及搜索列表
-        console.log(result);
-        console.log("query type:",result.getResultType());
+        //console.log(result);
+        //console.log("query type:",result.getResultType());
         addPromptHtml(result); // 添加提示词（在 #promptDiv 节点上）
         // 1: 普通搜索，2：视野内搜索，3：普通建议词搜索
         // 4：普通建议词搜索，5：公交规划建议词搜索
@@ -370,7 +370,7 @@ function onLoad() {
                     }else if(promptType==2){
                         promptHtml+=`<p>在<strong>${promptAdmins[0].name}</strong>没有搜索到与<strong>${obj.getKeyword()}</strong>相关的结果。</p>`;
                         if(meanprompt){// 自定义弹出的？ did you mean prompt: 没有找到提供搜索建议?
-                            console.log("meanprompt 有值>>>>>>");
+                            //console.log("meanprompt 有值>>>>>>");
                             promptHtml+=`<p>您是否要找：<font weight='bold' color='#035fbe><strong>${meanprompt}</strong></font></p>`;
                         }
                     }else if(promptType==3){
@@ -382,7 +382,7 @@ function onLoad() {
                 }
                 if(promptHtml != ""){
                     console.log(promptHtml);
-// !!!之后再改 $("#promptDiv")
+                    //$("#promptDiv").css("display","block");
                     document.getElementById("promptDiv").style.display="block";
                     document.getElementById("promptDiv").innerHTML=promptHtml
                 }else{
@@ -439,38 +439,76 @@ function onLoad() {
         // 解析推荐城市
         function statistics(obj) {
             if(obj){
-// pointArr 没用？
-                var priorityCityHtml="";
-                var allAdminsHtml="";
-                console.log(">>>>>>>");
-                console.log(obj);
-                console.log(priorityCitys);
+                var priorityCityUl,readmoreTag;
+                var statisticsDiv=jQuery("div#statisticsDiv").append("<span>在中国以下城市有结果：</span>");
                 var priorityCitys = obj.priorityCitys;
                 if(priorityCitys){
                     //推荐城市显示
-                    priorityCityHtml += "在中国以下城市有结果<ul>";
-                    priorityCityHtml += priorityCitys.map((city)=>{
-                        return `<li>${city.name}(${city.count})</li>`
-                    }).join("");
-                    priorityCityHtml+="</ul>";
+                    statisticsDiv.append("<span>在中国以下城市有结果：</span>");
+                    priorityCityUl = document.createElement("ul");
+                    //priorityCityHtml += "在中国以下城市有结果:<ul>";
+                    priorityCitys.forEach((city)=>{
+                        var li=document.createElement("li");
+                        var a = document.createElement("a");
+                        a.text=city.name;
+                        a.onclick=function(){
+                            map.centerAndZoom(new TLngLat(parseInt(city.lon),parseInt(city.lat)),9);
+                        };
+                        li.appendChild(a);
+                        li.appendChild(document.createTextNode("("+city.count+")"));
+                        priorityCityUl.appendChild(li);
+                        //return `<li><a onclick="map.centerAndZoom(new TLngLat(118.7912, 32.061));">${city.name}</a>(${city.count})</li>`
+                    });
+                    //priorityCityHtml+="</ul>";
                 }
                 var allAdmins = obj.allAdmins;
                 if(allAdmins){
-                    // function  jQuery('div#statisticsi>ul#readmore').slideToggle('slow');
-                    allAdminsHtml +=`<a onclick=function(){}>更多城市</a><ul id='readmore'>`; //  可以添加一个动作 slideup/slidedown, 现实和隐藏
+                    readmoreTag = document.createElement("a");
+                    readmoreTag.innerHTML="&nbsp;更多城市>>>";
+                    readmoreTag.href="#";
+                    readmoreTag.onclick=function(){
+                        jQuery('div#statisticsDiv>ul#readmore').slideToggle('slow');
+                    };
+
+                    var addAdminsUl=document.createElement('ul');
+                    addAdminsUl.id="readmore";
+                    addAdminsUl.style.display="none";
+                    //allAdminsHtml +=`<a onclick="jQuery('div#statisticsDiv>ul#readmore').slideToggle('slow');">&nbsp;更多城市>>></br></a><ul id='readmore' style="display:none">`; //  可以添加一个动作 slideup/slidedown, 现实和隐藏
                     for(var i=0;i<allAdmins.length;i++){
-                        allAdminsHtml+=`<li>${allAdmins[i].name}(${allAdmins[i].count})`;
+                        var li = document.createElement("li");
+                        var a = document.createElement("a");
+                        a.text=allAdmins[i].name;
+                        a.onclick=(function(n){
+                            // 使用闭包(立即执行外层的函数，返回一个函数)，或者将 'var i' 改成 'let i'
+                            return function(){
+                                map.centerAndZoom(new TLngLat(parseInt(allAdmins[n].lon),parseInt(allAdmins[n].lat)),9);
+                            };
+                        })(i);
+                        li.appendChild(a);
+                        li.appendChild(document.createTextNode("("+allAdmins[i].count+")"));
+                        //allAdminsHtml+=`<li>${allAdmins[i].name}(${allAdmins[i].count})`;
                         // childAdmins  省里面的市？
                         var childAdmins = allAdmins[i].childAdmins;
-                        allAdminsHtml+=childAdmins?childAdmins.map((childadmin_item)=>{
-                            return `<blockquote>${childadmin_item.name}(${childadmin_item.count})</blockquote>`;
-                        }).join(""):""+"</li>";
+                        if(childAdmins){
+                            childAdmins.forEach((childadmin_item)=>{
+                                //li.innerHTML=`<blockquote>${childadmin_item.name}(${childadmin_item.count})`;
+                                var quote = document.createElement("blockquote");
+                                quote.style.padding="0px";
+                                quote.style.margin="0 8px 3px";
+                                quote.textContent=childadmin_item.name+"("+childadmin_item.count+")";
+                                quote.className="small";
+                                li.appendChild(quote);
+                                //return `<blockquote>${childadmin_item.name}(${childadmin_item.count})</blockquote>`;
+                            });
+                        }
+                        addAdminsUl.appendChild(li);
                     }
-                    allAdminsHtml+="</ul>"
-                    
+                    //allAdminsHtml+="</ul>"                    
                 }
-                document.getElementById("statisticsDiv").style.display="block";
-                document.getElementById("statisticsDiv").innerHTML=priorityCityHtml+allAdminsHtml;
+                jQuery('#statisticsDiv').css("display","block");
+                //jQuery("#statisticsDiv").html(priorityCityHtml+allAdminsHtml);
+                // priorityCityUl: 主要城市， readmoreTag：查看更多，addAdminsUl：更多其城市
+                jQuery("#statisticsDiv").append(priorityCityUl).append(readmoreTag).append(addAdminsUl);
             }
         }
  
@@ -819,7 +857,6 @@ function addTools() {
     //？？只有在添加标注之后点击编辑才可以对标注进行编辑，并且不可以退出编辑状态？？？
     markerTool = new TMarkTool(map);
     TEvent.addListener(markerTool, "mouseup", (lnglat) => {
-        console.log("test-end?");
         marker = TMarker(lnglat);
         map.addOverLay(marker);
         markerTool.close();
@@ -836,8 +873,8 @@ function addTools() {
     polygonTool = new TPolygonTool(map, config);
     TEvent.addListener(polygonTool, "draw", (bounds, area) => {
         polygonTool.close();
-        console.log("坐标:" + bounds);
-        console.log(area);
+        //console.log("坐标:" + bounds);
+        //console.log(area);
     });
     //圆形工具
     circleTool = new TCircleTool(map, config);
