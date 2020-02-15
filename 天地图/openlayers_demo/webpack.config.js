@@ -42,6 +42,15 @@ module.exports={
                         loader: 'postcss-loader'
                 }],
                 exclude: /(node_modules|\.vscode)/
+            },{
+                test: /\.(png|jpe?g|gif|svg)$/,
+                use:{
+                    loader: 'url-loader', // 进阶版的 file-loader
+                    options:{
+                        limit: 10000,
+                        name: 'img/[name]__[local]--[hash:7].ext'
+                    }
+                }
             }
         ]
     },

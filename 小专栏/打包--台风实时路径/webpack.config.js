@@ -25,7 +25,7 @@ module.exports = {
                 },
                 exclude: /node-modules/
             },{// url-loader 是加强版的 file-loader
-                test: /\.(png|jpe?g|git|svg)$/,
+                test: /\.(png|jpe?g|gif|svg)$/,
                 use: {
                     loader: 'url-loader',
                     options: {
