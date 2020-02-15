@@ -69,5 +69,23 @@
   - 检索结果及相关：`getResults()`, `gotoPage()`,`clearResults()`,`setSearchCompleteCallback()`
   - 页面设置：略
 - 2) `TLocalSearchResult`类：表示`TLocalSearch`的检索结果，通过`TLocalSearch.getResults()`或`TLocalSearch`的`onSearchComplete`回调函数的参数得到。
+### 9.2 公共交通路线
+#### 9.2.1 公交路线规划(TTransitRoute)
+- 1) 构造函数：`TTransitRoute(map:TMap,opts:TransitRouteOptions)`
+- 2) `TTransitRoute`类的方法
+  - 检索：`search(start:TLngLat,end:TLngLat)`
+  - 返回最近一次的检索结果：`getResult()`,返回值为`TTransitRouteLine`类
+  - 清除最近一次的检索结果：`clearResults()`
+  - 设置路线规划策略：`setPolicy(policy:Num)`
+  - 设置检索结束后的回调函数：`setSearchCompleteCallback(fun:Function)`
+  - 返回状态码：`getStatus()`
+- 3) 路线规划返回结果：`TTransitRouteResult`类的方法
+  - 返回方案个数：`getNumPlans()`
+  - 返回索引指定的方案：`getPlan(i:Num)`，返回值为`TTransitRouteLine`类，表示一条公交线路。
+- 4) 路线规划方案：`TTransitRouteLine`类的方法
+  - 返回线路类型：`getSegmentType()`
+  - 返回起站点信息：`getStationStart()`、`getStationEnd()`
+  - 返回线路内容：`getSegmentLine()`
+#### 9.2.2 公交路线查询(TBusLineSearch)
 
 

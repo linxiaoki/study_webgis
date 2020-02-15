@@ -1,8 +1,12 @@
 //app.js
 var map;
+var startIcon_url = require("./static/start.png");
+var endIcon_url = require("./static/end.png");
+var map_bus = require("./static/map_bus.png");
+var map_metro = require("./static/map_metro.png");
 
 function onLoad() {
-    var zoom = 10;
+    var zoom = 11;
     map = new TMap("mapDiv", {
         projection: "EPSG:4326"  //900913  或  4326
     });
@@ -115,7 +119,6 @@ function onLoad() {
                         map.removeLayer(wmsLayer);
                         break;
                 }
-                //;
             }
         });
     }
@@ -263,308 +266,602 @@ function onLoad() {
         map.addContextMenu(menu);
     }
 
-    //⊙⊙ 服务-搜索
+    //⊙⊙ 服务-地点搜索
     {
-    var config = {
-        pageCapacity: 10,
-        onSearchComplete: localSearchResult //接收数据的回调函数 
-    };
-    localsearch = new TLocalSearch(map, config); // 创建搜索对象
-    // 自定义搜索控件
-    var searchControl = new THtmlElementControl(jQuery("div#search_tool")[0]);
-    searchControl.setRight(20);
-    searchControl.setTop(20);
-    map.addControl(searchControl);
-    // html 按钮绑定事件
-    jQuery("div.search>input[type=button]").click(function(){
-        localsearch.search(jQuery("div.search>input#keywords").val()); // 搜索
-    });
-    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[0]).click(()=>{
-        localsearch.firstPage(); // 第一页
-    });
-    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[1]).click(()=>{
-        localsearch.previousPage(); // 上一页
-    });
-    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[2]).click(()=>{
-        localsearch.nextPage();  // 下一页
-    });
-    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[3]).click(()=>{
-        localsearch.lastPage();  // 最后一页
-    });
-    jQuery(jQuery("div#resultDiv>div#pageDiv>input")[5]).click(()=>{
-        localsearch.gotoPage(parseInt(jQuery("div#pageDiv>input#pageId").val()));  // 转到 n 页
-    });
+        // 缩放等级zoom会影响搜索的结果
+        // 创建搜索对象
+        var localsearch = new TLocalSearch(map, {
+            pageCapacity: 10,
+            onSearchComplete: localSearchResult //接收数据的回调函数 
+        });
+        // 绘制搜索框
+        var searchOveraly;
+        var createSearchRect;
+        var recttool = new TRectTool(map, {
+            strokeColor: "blue",
+            strokeWeight: "3px",
+            strokeStyle: "solid",
+            opacity: 0.5,
+            fillColor: "#FFFFFF"
+        });
+        TEvent.addListener(recttool, "draw", (bounds) => {
+            //范围内的关键字搜索
+            createSearchRect = (function (bounds) {
+                console.log("defined createSearchRect")
+                return function () {
+                    searchOveraly = new TRect(bounds);
+                    map.addOverLay(searchOveraly);
+                }
+            })(bounds);
+            console.log(bounds);
+            console.log("test bounds:", new TBounds(116.36231, 39.87784, 116.43954, 39.92841));
+            localsearch.searchInBounds(jQuery("div.search>input#keywords").val(), bounds);
+            recttool.close();
+        })
+        // 自定义搜索控件
+        var searchControl = new THtmlElementControl(jQuery("div#tab-search-container")[0]);
+        searchControl.setRight(20);
+        searchControl.setTop(20);
+        map.addControl(searchControl);
+        // html 按钮绑定事件
+        jQuery("div#positionSearch>div.search>input[type=button]").click(function () {
+            recttool.close();
+            if (jQuery("div.search input#searchBound").is(":checked")) {
+                recttool.open();    // 画框限定范围  
+            } else {
+                // 关键字搜索-整图
+                localsearch.search(jQuery("div.search>input#keywords").val());
+            }
+            //中心点关键字搜索  localsearch.searchNearby(jQuery("div.search>input#keywords").val(),center_latlon,radius)
+        });
+        jQuery(jQuery("div#resultDiv1>div#pageDiv>input")[0]).click(() => {
+            localsearch.firstPage(); // 第一页
+        });
+        jQuery(jQuery("div#resultDiv1>div#pageDiv>input")[1]).click(() => {
+            localsearch.previousPage(); // 上一页
+        });
+        jQuery(jQuery("div#resultDiv1>div#pageDiv>input")[2]).click(() => {
+            localsearch.nextPage();  // 下一页
+        });
+        jQuery(jQuery("div#resultDiv1>div#pageDiv>input")[3]).click(() => {
+            localsearch.lastPage();  // 最后一页
+        });
+        jQuery(jQuery("div#resultDiv1>div#pageDiv>input")[5]).click(() => {
+            localsearch.gotoPage(parseInt(jQuery("div#pageDiv>input#pageId").val()));  // 转到 n 页
+        });  // 转到某一页
 
 
-    // 接收数据的回调函数
-    function localSearchResult(result) {
-        clearAll();  // 清空地图及搜索列表
-        //console.log(result);
-        //console.log("query type:",result.getResultType());
-        addPromptHtml(result); // 添加提示词（在 #promptDiv 节点上）
-        // 1: 普通搜索，2：视野内搜索，3：普通建议词搜索
-        // 4：普通建议词搜索，5：公交规划建议词搜索
-        // 7：纯POI搜索(排除公交线)
-        switch (parseInt(result.getResultType())) {
-            case 1:
-                // 解析点数据结果
-                pois(result.getPois());
-                break;
-            case 2:
-                // 解析推荐城市
-                statistics(result.getStatistics())
-                break;
-            case 3:
-                // 解析行政区划边界
-                area(result.getArea());
-                break;
-            case 4:
-                // 解析建议词信息
-                suggests(result.getSuggests());
-                break;
-            case 5:
-                // 解析公交信息
-                lineData(result.getLineData());
-                break;
-        }
-        // 清空地图及搜索列表
-        function clearAll(){
-            map.clearOverLays();
-            document.getElementById("searchDiv").innerHTML="";
-            document.getElementById("resultDiv").style.display="none";
-            document.getElementById("statisticsDiv").innerHTML="";
-            document.getElementById("statisticsDiv").style.display="none";
-            document.getElementById("promptDiv").innerHTML="";
-            document.getElementById("promptDiv").style.display="none";
-            document.getElementById("suggestsDiv").innerHTML="";
-            document.getElementById("suggestsDiv").style.display="none";
-            document.getElementById("lineDataDiv").innerHTML="";
-            document.getElementById("lineDataDiv").style.display="none";
-        }
+        // 接收数据的回调函数
+        function localSearchResult(result) {
+            clearAll();  // 清空地图及搜索列表
+            console.log("is run createSearchRect");
+            if (createSearchRect) {
+                console.log("run createSearchRect");
+                createSearchRect();
+                createSearchRect = null;
+            }
+            //console.log(result);
+            //console.log("query type:",result.getResultType());
+            addPromptHtml(result); // 添加提示词（在 #promptDiv 节点上）
+            // 1: 普通搜索，2：视野内搜索，3：普通建议词搜索
+            // 4：普通建议词搜索，5：公交规划建议词搜索
+            // 7：纯POI搜索(排除公交线)
+            console.log("resutl Type:", result.getResultType());
+            switch (parseInt(result.getResultType())) {
+                case 1:
+                    // 解析点数据结果
+                    console.log("getPois");
+                    pois(result.getPois());
+                    break;
+                case 2:
+                    // 解析推荐城市
+                    console.log("getStatistics");
+                    statistics(result.getStatistics())
+                    break;
+                case 3:
+                    // 解析行政区划边界
+                    console.log("getArea");
+                    area(result.getArea());
+                    break;
+                case 4:
+                    // 解析建议词信息
+                    console.log("getSuggests");
+                    suggests(result.getSuggests());
+                    break;
+                case 5:
+                    // 解析公交信息
+                    console.log("getLineData");
+                    lineData(result.getLineData());
+                    break;
+            }
+            // 清空地图及搜索列表
+            function clearAll() {
+                map.clearOverLays();  // 删除所有地图覆盖物
+                document.getElementById("searchDiv").innerHTML = "";
+                document.getElementById("resultDiv1").style.display = "none";
+                document.getElementById("statisticsDiv").innerHTML = "";
+                document.getElementById("statisticsDiv").style.display = "none";
+                document.getElementById("promptDiv").innerHTML = "";
+                document.getElementById("promptDiv").style.display = "none";
+                document.getElementById("suggestsDiv").innerHTML = "";
+                document.getElementById("suggestsDiv").style.display = "none";
+                document.getElementById("lineDataDiv").innerHTML = "";
+                document.getElementById("lineDataDiv").style.display = "none";
+            }
 
-        //在 #promptDiv 节点上 添加提示词
-        function addPromptHtml(obj) {
-            //var prompts = obj.getPrompt(); // 返回提示信息
-            var prompts=obj.getPrompt();
-            if (prompts) {
-                var promptHtml = "";
-                for (var i = 0; i < prompts.length; i++) {
-                    /**prompt 结构
-                     * 
-                     * {
-                     *   "keyword": "~",
-                     *   "admins":[{"name":"中国"//行政区范围,"adminCode":"156000000"//行政区代码}],
-                     *   "type": 2
-                     * }
-                     * type=1 时，一般提示为"是否在XXX搜索名称含XXX的结果" (搜索更多)
-                     * type=2 时，一般提示为"在 XXX 没有搜索到相关的结果"  (没有结果，查找其他)
-                     * type=3 时，一般会列出查询的多个结果，点击结果即可完成行政区跳转 (列出结果)
-                     */
-                    var prompt = prompts[i];
-                    var promptType = prompt.type;
-                    var promptAdmins = prompt.admins;
+            //在 #promptDiv 节点上 添加提示词
+            function addPromptHtml(obj) {
+                //var prompts = obj.getPrompt(); // 返回提示信息
+                var prompts = obj.getPrompt();
+                if (prompts) {
+                    var promptHtml = "";
+                    for (var i = 0; i < prompts.length; i++) {
+                        /**prompt 结构
+                         * 
+                         * {
+                         *   "keyword": "~",
+                         *   "admins":[{"name":"中国"//行政区范围,"adminCode":"156000000"//行政区代码}],
+                         *   "type": 2
+                         * }
+                         * type=1 时，一般提示为"是否在XXX搜索名称含XXX的结果" (搜索更多)
+                         * type=2 时，一般提示为"在 XXX 没有搜索到相关的结果"  (没有结果，查找其他)
+                         * type=3 时，一般会列出查询的多个结果，点击结果即可完成行政区跳转 (列出结果)
+                         */
+                        var prompt = prompts[i];
+                        var promptType = prompt.type;
+                        var promptAdmins = prompt.admins;
 
-                    var meanprompt = prompt.DidYouMean;
-                    if(promptType==1){
-                        promptHtml +=`<p>您是否要在<strong>${promptAdmins[0].name}</strong>搜索更多包含<strong>${obj.getKeyword()}</strong>的相关内容？</p>`;
-                    }else if(promptType==2){
-                        promptHtml+=`<p>在<strong>${promptAdmins[0].name}</strong>没有搜索到与<strong>${obj.getKeyword()}</strong>相关的结果。</p>`;
-                        if(meanprompt){// 自定义弹出的？ did you mean prompt: 没有找到提供搜索建议?
-                            //console.log("meanprompt 有值>>>>>>");
-                            promptHtml+=`<p>您是否要找：<font weight='bold' color='#035fbe><strong>${meanprompt}</strong></font></p>`;
-                        }
-                    }else if(promptType==3){
-                        promptHtml+=`<p style='margin-bottom:3px;'>有以下相关结果，您是否要找：</p>`
-                        for(i=0;i<promptAdmins.length;i++){
-                            promptHtml+=`<p>${promptAdmins[i].name}</p>`;
+                        var meanprompt = prompt.DidYouMean;
+                        if (promptType == 1) {
+                            promptHtml += `<p>您是否要在<strong>${promptAdmins[0].name}</strong>搜索更多包含<strong>${obj.getKeyword()}</strong>的相关内容？</p>`;
+                        } else if (promptType == 2) {
+                            promptHtml += `<p>在<strong>${promptAdmins[0].name}</strong>没有搜索到与<strong>${obj.getKeyword()}</strong>相关的结果。</p>`;
+                            if (meanprompt) {// 自定义弹出的？ did you mean prompt: 没有找到提供搜索建议?
+                                //console.log("meanprompt 有值>>>>>>");
+                                promptHtml += `<p>您是否要找：<font weight='bold' color='#035fbe><strong>${meanprompt}</strong></font></p>`;
+                            }
+                        } else if (promptType == 3) {
+                            promptHtml += `<p style='margin-bottom:3px;'>有以下相关结果，您是否要找：</p>`
+                            for (i = 0; i < promptAdmins.length; i++) {
+                                promptHtml += `<p>${promptAdmins[i].name}</p>`;
+                            }
                         }
                     }
-                }
-                if(promptHtml != ""){
-                    console.log(promptHtml);
-                    //$("#promptDiv").css("display","block");
-                    document.getElementById("promptDiv").style.display="block";
-                    document.getElementById("promptDiv").innerHTML=promptHtml
-                }else{
-                    console.log("promptHtml == ''",promptHtml);
+                    if (promptHtml != "") {
+                        console.log(promptHtml);
+                        //$("#promptDiv").css("display","block");
+                        document.getElementById("promptDiv").style.display = "block";
+                        document.getElementById("promptDiv").innerHTML = promptHtml
+                    } else {
+                        console.log("promptHtml == ''", promptHtml);
+                    }
                 }
             }
-        }
-        
-        // 解析点数据结果
-        function pois(pts) {
-            if(pts){
-                var divMarker=document.createElement("div")
-                var pointArr=[]; //坐标数组，设置最佳比例尺会用到
-                // 源码里面是在for循环内使用闭包，为了每个点都执行函数，用 arr.forEach 替代
-                pts.forEach((ptItem,index)=>{
-                    var name = ptItem.name; //名称
-                    var address = ptItem.address; // 地址
-                    var lnglatArr = ptItem.lonlat.split(" "); // 坐标
-                    var lnglat = new TLngLat(lnglatArr[0],lnglatArr[1]);
-                    pointArr.push(lnglat);
-                    // 地图上添加标注点，并注册点击事件
-                    var marker = new TMarker(lnglat);
-                    map.addOverLay(marker);
-                    // 原为：bind(marker,'click',marker,function(){})  
-                    // bind 多了一个参数marker,是因为 marker[1] 注册'click'事件；marker[2] 执行function，并且 this 指向 marker[2] 吗？
-                    TEvent.addListener(marker,'click',function(){
-                        var info = this.openInfoWinHtml("地址"+address);
-                        info.setTitle(name);
-                    });
-                    // 页面显示搜索到列表
-                    var a = document.createElement("a");
-                    //a.href="javascript://";
-                    a.innerHTML=name;
-                    a.onclick=function(){
-                        // 显示信息框
-                        var info = marker.openInfoWinHtml("地址"+address);
-                        info.setTitle(name);
-                    };
-                    divMarker.appendChild(document.createTextNode((index + 1)+"."));
-                    divMarker.appendChild(a);
-                    divMarker.appendChild(document.createElement("br"));0
-                })
 
-                // 显示地图的最佳级别
-                map.setViewport(pointArr);
-                //显示搜索结果
-                divMarker.appendChild(document.createTextNode(` 共${localsearch.getCountNumber()
-                }条记录，分${localsearch.getCountPage()}页，当前第${localsearch.getPageIndex()}页`));
-                document.getElementById('searchDiv').appendChild(divMarker);
-                document.getElementById('resultDiv').style.display="block";
-            }
-        }
-
-        // 解析推荐城市
-        function statistics(obj) {
-            if(obj){
-                var priorityCityUl,readmoreTag;
-                var statisticsDiv=jQuery("div#statisticsDiv").append("<span>在中国以下城市有结果：</span>");
-                var priorityCitys = obj.priorityCitys;
-                if(priorityCitys){
-                    //推荐城市显示
-                    statisticsDiv.append("<span>在中国以下城市有结果：</span>");
-                    priorityCityUl = document.createElement("ul");
-                    //priorityCityHtml += "在中国以下城市有结果:<ul>";
-                    priorityCitys.forEach((city)=>{
-                        var li=document.createElement("li");
+            // 解析点数据结果
+            function pois(pts) {
+                if (pts) {
+                    var divMarker = document.createElement("div")
+                    var pointArr = []; //坐标数组，设置最佳比例尺会用到
+                    // 源码里面是在for循环内使用闭包，为了每个点都执行函数，用 arr.forEach 替代
+                    pts.forEach((ptItem, index) => {
+                        var name = ptItem.name; //名称
+                        var address = ptItem.address; // 地址
+                        var lnglatArr = ptItem.lonlat.split(" "); // 坐标
+                        var lnglat = new TLngLat(lnglatArr[0], lnglatArr[1]);
+                        pointArr.push(lnglat);
+                        // 地图上添加标注点，并注册点击事件
+                        var marker = new TMarker(lnglat);
+                        map.addOverLay(marker);
+                        // 原为：bind(marker,'click',marker,function(){})  
+                        // bind 多了一个参数marker,是因为 marker[1] 注册'click'事件；marker[2] 执行function，并且 this 指向 marker[2] 吗？
+                        TEvent.addListener(marker, 'click', function () {
+                            var info = this.openInfoWinHtml("地址" + address);
+                            info.setTitle(name);
+                        });
+                        // 页面显示搜索到列表
                         var a = document.createElement("a");
-                        a.text=city.name;
-                        a.onclick=function(){
-                            map.centerAndZoom(new TLngLat(parseInt(city.lon),parseInt(city.lat)),9);
+                        //a.href="javascript://";
+                        a.innerHTML = name;
+                        a.onclick = function () {
+                            // 显示信息框
+                            var info = marker.openInfoWinHtml("地址" + address);
+                            info.setTitle(name);
                         };
-                        li.appendChild(a);
-                        li.appendChild(document.createTextNode("("+city.count+")"));
-                        priorityCityUl.appendChild(li);
-                        //return `<li><a onclick="map.centerAndZoom(new TLngLat(118.7912, 32.061));">${city.name}</a>(${city.count})</li>`
-                    });
-                    //priorityCityHtml+="</ul>";
-                }
-                var allAdmins = obj.allAdmins;
-                if(allAdmins){
-                    readmoreTag = document.createElement("a");
-                    readmoreTag.innerHTML="&nbsp;更多城市>>>";
-                    readmoreTag.href="#";
-                    readmoreTag.onclick=function(){
-                        jQuery('div#statisticsDiv>ul#readmore').slideToggle('slow');
-                    };
+                        divMarker.appendChild(document.createTextNode((index + 1) + "."));
+                        divMarker.appendChild(a);
+                        divMarker.appendChild(document.createElement("br")); 0
+                    })
 
-                    var addAdminsUl=document.createElement('ul');
-                    addAdminsUl.id="readmore";
-                    addAdminsUl.style.display="none";
-                    //allAdminsHtml +=`<a onclick="jQuery('div#statisticsDiv>ul#readmore').slideToggle('slow');">&nbsp;更多城市>>></br></a><ul id='readmore' style="display:none">`; //  可以添加一个动作 slideup/slidedown, 现实和隐藏
-                    for(var i=0;i<allAdmins.length;i++){
-                        var li = document.createElement("li");
-                        var a = document.createElement("a");
-                        a.text=allAdmins[i].name;
-                        a.onclick=(function(n){
-                            // 使用闭包(立即执行外层的函数，返回一个函数)，或者将 'var i' 改成 'let i'
-                            return function(){
-                                map.centerAndZoom(new TLngLat(parseInt(allAdmins[n].lon),parseInt(allAdmins[n].lat)),9);
+                    // 显示地图的最佳级别
+                    map.setViewport(pointArr);
+                    //显示搜索结果
+                    divMarker.appendChild(document.createTextNode(` 共${localsearch.getCountNumber()
+                        }条记录，分${localsearch.getCountPage()}页，当前第${localsearch.getPageIndex()}页`));
+                    document.getElementById('searchDiv').appendChild(divMarker);
+                    document.getElementById('resultDiv1').style.display = "block";
+                }
+            }
+
+            // 解析推荐城市
+            function statistics(obj) {
+                if (obj) {
+                    var priorityCityUl, readmoreTag;
+                    var statisticsDiv = jQuery("div#statisticsDiv").append("<span>在中国以下城市有结果：</span>");
+                    var priorityCitys = obj.priorityCitys;
+                    if (priorityCitys) {
+                        //推荐城市显示
+                        statisticsDiv.append("<span>在中国以下城市有结果：</span>");
+                        priorityCityUl = document.createElement("ul");
+                        //priorityCityHtml += "在中国以下城市有结果:<ul>";
+                        priorityCitys.forEach((city) => {
+                            var li = document.createElement("li");
+                            var a = document.createElement("a");
+                            a.text = city.name;
+                            a.onclick = function () {
+                                map.centerAndZoom(new TLngLat(parseInt(city.lon), parseInt(city.lat)), 9);
                             };
-                        })(i);
-                        li.appendChild(a);
-                        li.appendChild(document.createTextNode("("+allAdmins[i].count+")"));
-                        //allAdminsHtml+=`<li>${allAdmins[i].name}(${allAdmins[i].count})`;
-                        // childAdmins  省里面的市？
-                        var childAdmins = allAdmins[i].childAdmins;
-                        if(childAdmins){
-                            childAdmins.forEach((childadmin_item)=>{
-                                //li.innerHTML=`<blockquote>${childadmin_item.name}(${childadmin_item.count})`;
-                                var quote = document.createElement("blockquote");
-                                quote.style.padding="0px";
-                                quote.style.margin="0 8px 3px";
-                                quote.textContent=childadmin_item.name+"("+childadmin_item.count+")";
-                                quote.className="small";
-                                li.appendChild(quote);
-                                //return `<blockquote>${childadmin_item.name}(${childadmin_item.count})</blockquote>`;
-                            });
+                            li.appendChild(a);
+                            li.appendChild(document.createTextNode("(" + city.count + ")"));
+                            priorityCityUl.appendChild(li);
+                            //return `<li><a onclick="map.centerAndZoom(new TLngLat(118.7912, 32.061));">${city.name}</a>(${city.count})</li>`
+                        });
+                        //priorityCityHtml+="</ul>";
+                    }
+                    var allAdmins = obj.allAdmins;
+                    if (allAdmins) {
+                        readmoreTag = document.createElement("a");
+                        readmoreTag.innerHTML = "&nbsp;更多城市>>>";
+                        readmoreTag.href = "#";
+                        readmoreTag.onclick = function () {
+                            jQuery('div#statisticsDiv>ul#readmore').slideToggle('slow');
+                        };
+
+                        var addAdminsUl = document.createElement('ul');
+                        addAdminsUl.id = "readmore";
+                        addAdminsUl.style.display = "none";
+                        //allAdminsHtml +=`<a onclick="jQuery('div#statisticsDiv>ul#readmore').slideToggle('slow');">&nbsp;更多城市>>></br></a><ul id='readmore' style="display:none">`; //  可以添加一个动作 slideup/slidedown, 现实和隐藏
+                        for (var i = 0; i < allAdmins.length; i++) {
+                            var li = document.createElement("li");
+                            var a = document.createElement("a");
+                            a.text = allAdmins[i].name;
+                            a.onclick = (function (n) {
+                                // 使用闭包(立即执行外层的函数，返回一个函数)，或者将 'var i' 改成 'let i'
+                                return function () {
+                                    map.centerAndZoom(new TLngLat(parseInt(allAdmins[n].lon), parseInt(allAdmins[n].lat)), 9);
+                                };
+                            })(i);
+                            li.appendChild(a);
+                            li.appendChild(document.createTextNode("(" + allAdmins[i].count + ")"));
+                            //allAdminsHtml+=`<li>${allAdmins[i].name}(${allAdmins[i].count})`;
+                            // childAdmins  省里面的市？
+                            var childAdmins = allAdmins[i].childAdmins;
+                            if (childAdmins) {
+                                childAdmins.forEach((childadmin_item) => {
+                                    //li.innerHTML=`<blockquote>${childadmin_item.name}(${childadmin_item.count})`;
+                                    var quote = document.createElement("blockquote");
+                                    quote.style.padding = "0px";
+                                    quote.style.margin = "0 8px 3px";
+                                    quote.textContent = childadmin_item.name + "(" + childadmin_item.count + ")";
+                                    quote.className = "small";
+                                    li.appendChild(quote);
+                                    //return `<blockquote>${childadmin_item.name}(${childadmin_item.count})</blockquote>`;
+                                });
+                            }
+                            addAdminsUl.appendChild(li);
                         }
-                        addAdminsUl.appendChild(li);
+                        //allAdminsHtml+="</ul>"                    
                     }
-                    //allAdminsHtml+="</ul>"                    
+                    jQuery('#statisticsDiv').css("display", "block");
+                    //jQuery("#statisticsDiv").html(priorityCityHtml+allAdminsHtml);
+                    // priorityCityUl: 主要城市， readmoreTag：查看更多，addAdminsUl：更多其城市
+                    jQuery("#statisticsDiv").append(priorityCityUl).append(readmoreTag).append(addAdminsUl);
                 }
-                jQuery('#statisticsDiv').css("display","block");
-                //jQuery("#statisticsDiv").html(priorityCityHtml+allAdminsHtml);
-                // priorityCityUl: 主要城市， readmoreTag：查看更多，addAdminsUl：更多其城市
-                jQuery("#statisticsDiv").append(priorityCityUl).append(readmoreTag).append(addAdminsUl);
             }
-        }
- 
-        // 解析行政区划边界
-        function area(obj) {
-            if(obj){
-                var pointArr=[];
-                var points=obj.points;
-                for(var i=0;i<points.length;i++){
-                    var regionLngLats = [];
-                    var regionArr = points[i].region.split(",");
-                    for(var j=0;j<regionArr.length;j++){
-                        var lnglat=new TLngLat(regionArr[j].split(" ")[0],regionArr[j].split(" ")[1]);
-                        regionLngLats.push(lnglat);
-                        pointsArr.push(lnglat);
+
+            // 解析行政区划边界
+            function area(obj) {
+                if (obj) {
+                    var pointArr = [];
+                    var points = obj.points;
+                    for (var i = 0; i < points.length; i++) {
+                        var regionLngLats = [];
+                        var regionArr = points[i].region.split(",");
+                        for (var j = 0; j < regionArr.length; j++) {
+                            var lnglat = new TLngLat(regionArr[j].split(" ")[0], regionArr[j].split(" ")[1]);
+                            regionLngLats.push(lnglat);
+                            pointsArr.push(lnglat);
+                        }
+                        // 创建线对象
+                        var line = new TPolyline(regionLngLatss, {
+                            strokeColor: "blue",
+                            strokeWeight: 3,
+                            //strokeOpacity: 1,
+                            strokeStyle: "dashed"
+                        });
+                        // 向地图上添加线
+                        map.addOverLay(line);
+                        // 显示最佳比例尺
+                        map.setViewport(pointsArr);
                     }
-                    // 创建线对象
-                    var line = new TPolyline(regionLngLatss,{
-                        strokeColor: "blue",
-                        strokeWeight: 3,
-                        //strokeOpacity: 1,
-                        strokeStyle: "dashed"
-                    });
-                    // 向地图上添加线
-                    map.addOverLay(line);
-                    // 显示最佳比例尺
-                    map.setViewport(pointsArr);
                 }
-            }   
-        }
-
-        // 解析建议词信息
-        function suggests(obj){
-            if(obj){
-                // 建议词提示，如果搜索类型为公交规划建议词(type=?5?)或公交站(type=?7?)搜索时，返回结果为公交信息的建议词
-                var suggestsHtml="建议词提示<ul>"+obj.map((suggest_item)=>{
-                    return `<li>${suggest_item.name}&nbsp;&nbsp;<font style="color:#666666">${suggest_item.address}</font></li>`
-                }).join("")+"/ul";
-                document.getElementById("suggestsDiv").style.display="block";
-                document.getElementById("suggestsDiv").innerHTML=suggestsHtml;
             }
-        }
 
-        // 解析公交信息
-        function lineData(obj){
-            if(obj){
-                //公交提示
-                var lineDataHtml ="公交提示<ur>"+obj.map((station)=>{
-                    return `<li>${station.name}+&nbsp;%nbsp;<font style="color:#666666">共${station.stationNum}站</font></li>`;
-                }).join("")+"/ul";
-                document.getElementById("lineDataDiv").style.display="block";
-                document.getElementById("lineDataDiv").innerHTML=lineDataHtml;
+            // 解析建议词信息
+            function suggests(obj) {
+                if (obj) {
+                    // 建议词提示，如果搜索类型为公交规划建议词(type=?5?)或公交站(type=?7?)搜索时，返回结果为公交信息的建议词
+                    var suggestsHtml = "建议词提示<ul>" + obj.map((suggest_item) => {
+                        return `<li>${suggest_item.name}&nbsp;&nbsp;<font style="color:#666666">${suggest_item.address}</font></li>`
+                    }).join("") + "/ul";
+                    document.getElementById("suggestsDiv").style.display = "block";
+                    document.getElementById("suggestsDiv").innerHTML = suggestsHtml;
+                }
+            }
+
+            // 解析公交信息
+            function lineData(obj) {
+                if (obj) {
+                    //公交提示
+                    var lineDataHtml = "公交提示<ul>" + obj.map((station) => {
+                        return `<li>${station.name}+&nbsp;%nbsp;<font style="color:#666666">共${station.stationNum}站</font></li>`;
+                    }).join("") + "/ul";
+                    document.getElementById("lineDataDiv").style.display = "block";
+                    document.getElementById("lineDataDiv").innerHTML = lineDataHtml;
+                }
             }
         }
     }
+
+    //⊙⊙ 服务-路线搜索
+    {
+        var transitRoute;
+        var startLngLat, endLngLat; // searchBus()赋值，createStartMarker()再次使用
+        var startMarker, endMarker;
+        var startIcon,endIcon;
+        var startTool, endTool;
+        // 起点
+        startIcon = new TIcon(startIcon_url, new TSize(48, 48), { anchor: new TPixel(26, 43) });
+        endIcon = new TIcon(endIcon_url, new TSize(48, 48), { anchor: new TPixel(26, 43) });
+        startTool = new TMarkTool(map, {
+            icon: startIcon
+        });
+        TEvent.addListener(startTool, "mouseup", (point) => {
+            //向地图上添加起点 
+            //(startMarker未实例化则new TMarker(), 已经实例化则 setLngLat()), setLngLat() 放后面是因为其返回值是 undefined
+            (!startMarker && (startMarker=new TMarker(point, { icon: startIcon }))) || startMarker.setLngLat(point);
+            map.addOverLay(startMarker);
+            startTool.close();
+            //设置公交搜索起点
+            jQuery("div.search>input#start").val(point.getLng() + "," + point.getLat());
+        }); //mouseUpStartMarker
+        // 终点
+        endTool = new TMarkTool(map, {
+            icon: endIcon
+        });
+        TEvent.addListener(endTool, "mouseup", (point) => {
+            (!endMarker && (endMarker=new TMarker(point,{icon:endIcon}))) || endIcon.setLngLat(point);
+            //endMarker =  new TMarker(point, { icon: endIcon });
+            map.addOverLay(endMarker);
+            endTool.close();
+            jQuery("div.search>input#end").val(point.getLng() + "," + point.getLat());
+        }); //mouseUpEndMarker
+        // 创建公交搜索对象
+        transitRoute = new TTransitRoute(map, {
+            policy: 1, // 公交导航的策略参数
+            onSearchComplete: busSearchResult // 检索完成后的回调函数
+        });
+
+        // 绑定按钮(起点，终点，搜索)的click事件 (再试着使用 事件委托)
+        jQuery("div#lineSearch>div.search").click((ev) => {
+            var ev = ev || window.event;
+            var target = ev.target || ev.srcElement;
+            if (target.nodeName.toLocaleLowerCase() == "input" && target.type.toLocaleLowerCase() == "button") {
+                switch (target.defaultValue) {
+                    case "起点":
+                        map.removeOverLay(startMarker);
+                        startTool.open();
+                        break;
+                    case "终点":
+                        map.removeOverLay(endMarker);
+                        endTool.open();
+                        break;
+                    case "公交搜索":
+                        console.log("公交搜索");
+                        searchBus();
+                        break;
+                }
+            }
+        });
+
+        // 公交搜索
+        // 点击公交搜索按钮时触发的方法
+        function searchBus() {
+            console.log("searchBus");
+            //清空显示列表
+            document.getElementById("resultDiv2").innerHTML = "";
+            //清空地图
+            map.clearOverLays();
+            // 起点和终点的经纬度
+            var startVal = jQuery("div#lineSearch input#start").val().split(",");
+            startLngLat = new TLngLat(startVal[0], startVal[1]);
+            var endVal = jQuery("div#lineSearch input#end").val().split(",");
+            endLngLat = new TLngLat(endVal[0], endVal[1]);
+            map.centerAndZoom(startLngLat, 10);
+            // 设置公交策略
+            var planType = jQuery("div#lineSearch input[name='planType']:checked").val();
+            transitRoute.setPolicy(planType);
+            // 公交搜索
+            transitRoute.search(startLngLat, endLngLat);
+        }
+
+        // 显示公交搜索结果（回调函数）
+        function busSearchResult(result) {
+            console.log("busSearchResult");
+            if (transitRoute.getStatus() == 0) {
+                document.getElementById("resultDiv2").style.display = "block";
+                //添加起始点
+                createStartMarker();
+                // 其他函数用到 obj = result?
+                //obj=result;
+                var resultList = document.createElement("div");
+                // 获取方案个数
+                var plansNum = result.getNumPlans();
+                for (var i = 0; i < plansNum; i++) {
+                    //获得单条公交结果对象
+                    var plan = result.getPlan(i);
+                    //显示单个方案面板
+                    var div = document.createElement("div");
+                    div.style.cssText = "font-size:12px;cursor:pointer;border:1px solid #999999;";
+                    // 闭包（如果把 var i 改成 let i ，就不用闭包了）
+                    (function (i) {
+                        //添加click事件：点击方案绘制线路
+                        div.onclick = function () {
+                            // 清空地图
+                            map.clearOverLays();
+                            // 添加起始点
+                            createStartMarker();
+                            // 显示线路
+                            createSegments(result.getPlan(i));
+                        }
+                    })(i);
+                    // 显示方案内容：包括详细的方案内容、总时间、总距离
+                    var describeStr = `<strong>方案${i + 1}：${plan.getLineName().join(" → ")
+                        }，总时间：${plan.getDuration()}分，总距离：${Math.round(plan.getDistance())
+                        }米</strong>`;
+                    describeStr += `<div><img src="${startIcon_url}"/>${jQuery("div#lineSearch input#start").val()}</div>`;
+                    //显示每个方案的详细信息
+                    var segmentNum = plan.getNumSegments();
+                    for (var m = 0; m < segmentNum; m++) {
+                        var line = plan.getDetails(m);
+                        var segmentLine = line.getSegmentLine()[0];
+                        //经过的公交或地铁的站数
+                        var stationCount = "";
+                        if (segmentLine.setmentStationCount != "") {
+                            stationCount = `，经过${segmentLine.segmentStationCount}站`;
+                        }
+                        //线路类型1：步行，2：公交，3：地铁，4，地铁站内换乘
+                        switch (line.getSegmentType()) {
+                            case 1:
+                                console.log("segmentLine:");
+                                describeStr += `步行约${segmentLine.segmentDistance}米，到达${line.getStationEnd().name}，`;
+                                break;
+                            case 2:
+                            case 3:
+                                describeStr += `乘坐${segmentLine.direction + stationCount}，到达${line.getStationEnd().name}，`
+                                break;
+                            case 4:
+                                describeStr += "站内换乘，";
+                        }
+                    }
+                    //去掉结尾的逗号
+                    describeStr = describeStr.substring(0, describeStr.length - 1);
+                    describeStr += `<div><img src="${endIcon_url}"/>${jQuery("div#lineSearch input#start").val()}</div>`;
+
+                    div.innerHTML = describeStr;
+                    resultList.appendChild(div);
+                    //地图上默认绘制方案一的线路
+                    if (i == 0) {
+                        createSegments(result.getPlan(0));
+                    }
+                }
+                //显示公交搜索结果
+                document.getElementById("resultDiv2").appendChild(resultList);
+            }
+        }
+
+        //显示公交线路
+        function createSegments(plan) {
+            console.log("进入>>createSegments:绘制图标和线路。");
+            var segmentNum = plan.getNumSegments();
+            for (var m = 0; m < segmentNum; m++) {
+                var line = plan.getDetails(m);
+                var segmentLine = line.getSegmentLine()[0];
+                //显示线路
+                createRoute(segmentLine.linePoint, line.getSegmentType());
+                //显示换乘图标 (原方法名为createMarker)
+                createTransferMarker(line.getStationStart().lonlat, line.getStationEnd().lonlat,
+                    line.getSegmentType());
+            }
+
+            //绘制公交路线，pointsStr：经纬度字符串，type：线路类型，lnglat: 公交或地铁图标的经纬度
+            function createRoute(pointsStr, type) {
+                //去除结尾的分号,并以数组形式存储经纬度
+                var points = pointsStr.substring(0, pointsStr.length - 1).split(";");
+                var lnglatArr = [];
+                for (var i = 0; i < points.length; i++) {
+                    var lnglat = points[i].split(",");
+                    lnglatArr.push(new TLngLat(lnglat[0], lnglat[1]));
+                }
+                switch (type) {
+                    case 1: //步行
+                        var lineColor = "#2E9531";
+                        var lineStyle = "dashed";
+                        break;
+                    case 2: //公交
+                        var lineColor = "#2C64A7";
+                        var lineStyle = "solid";
+                        break;
+                    case 3: //地铁
+                        var lineColor = "#2C64A7";
+                        var lineStyle = "solid";
+                        break;
+                    default:
+                        var lineColor = "#2E9531";
+                        var lineStyle = "dashed";
+                }
+                //创建线对象
+                var line = new TPolyline(lnglatArr, {
+                    strokeColor: lineColor,
+                    strokeWeight: 5,
+                    strokeOpacity: 1,
+                    strokeStyle: lineStyle
+                });
+                //向地图上添加线
+                map.addOverLay(line);
+            }
+
+            //绘制公交换乘图标，lnglat：线路的起点和终点，type：线路类型
+            //map_bus/map_metro：bus/metro 图片的相对地址
+            function createTransferMarker(lnglatStartStr, lnglatEndStr, type) {
+                switch (type) {
+                    case 2://公交图标
+                        var icon = new TIcon(map_bus, new TSize(23, 23), { anchor: new TPixel(12, 12) });
+                        break;
+                    case 3://地铁图标(和下面的defult是一样的，可以删掉这个。。。)
+                        var icon = new TIcon(map_metro, new TSize(23, 23), { anchor: new TPixel(12, 12) });
+                        break;
+                    default://地铁站内换乘
+                        var icon = new TIcon(map_metro, new TSize(23, 23), { anchor: new TPixel(12, 12) });
+                }
+                // 在换乘的起点和终点处添加图标( 公共汽车或者地铁的图标)
+                if (type != 1) {
+                    console.log("换乘》type?",type);
+                    var lnglatStartArr = lnglatStartStr.split(",");
+                    var lnglatTransferStart = new TLngLat(lnglatStartArr[0], lnglatStartArr[1]);
+                    var lnglatEndArr = lnglatEndStr.split(",");
+                    var lnglatTransferEnd = new TLngLat(lnglatEndArr[0], lnglatEndArr[1]);
+                    var transferStartMarker = new TMarker(lnglatTransferStart, { icon, icon });
+                    map.addOverLay(transferStartMarker);
+                    var transferEndMarker = new TMarker(lnglatTransferEnd, { icon, icon });
+                    map.addOverLay(transferEndMarker);
+                }
+            }
+        }
+
+        // 添加起始点
+        function createStartMarker() {
+            // 向地图添加起点
+            console.log("create startMarker and endMarker. is must need?");
+            console.log("需要先removeOverLay(startMarker)吗？？");
+            (!startMarker && (startMarker=new TMarker(startLngLat, { icon: startIcon }))) || startMarker.setLngLat(startLngLat);
+            (!endMarker && (endMarker=new TMarker(endLngLat, { icon: endIcon }))) || endMarker.setLngLat(endLngLat);
+            map.addOverLay(startMarker);
+            map.addOverLay(endMarker);
+        }
+
     }
+
 }
 
 
@@ -575,7 +872,7 @@ function addControls() {
     var navigation_control = new TNavigationControl({
         type: "TMAP_NAVIGATION_CONTROL_LARGE",
         anchor: "TMAP_ANCHOR_TOP_RIGHT",
-        offset: [30, 50],
+        offset: [0, 0],
         showZoomInfo: true
     });
     var overview_control = new TOverviewMapControl({
@@ -589,6 +886,8 @@ function addControls() {
     [navigation_control, overview_control, scale_control, maptype_control].forEach((x) => map.addControl(x));
     maptype_control.setLeft(10);
     maptype_control.setTop(20);
+    navigation_control.setLeft(10);
+    navigation_control.setTop(50);
 }
 
 // 自定义控件: 绑定函数，根据 MapTypeSelect 选择图层
@@ -678,7 +977,6 @@ function addOverlays() {
     var circle = new TCircle(new TLngLat(118.7812, 32.19), 5000, config);
 
     [marker, label, infoWin, line, polygon, rect, ellipse, circle].forEach((x) => map.addOverLay(x));
-
 }
 
 // marker + infoWindow
@@ -690,7 +988,7 @@ function addMarkerAndInfo(lnglat_, text) {
     });
 
     map.addOverLay(marker);
-    TEvent.addListener(marker, "click", function(){
+    TEvent.addListener(marker, "click", function () {
         // 给labelClose 的 id 加上时间戳，这样添加多个 merkerAndInfo的时候，不会一起触发关闭事件
         var timestamp = new Date().getTime();
         debugger;
@@ -739,7 +1037,7 @@ function addMarkerAndInfo(lnglat_, text) {
         jQuery("span#labelClose" + timestamp).click(() => {  // 在 addOverLay 后，绑定关闭的事件
             map.removeOverLay(customerInfoLabel);
         });
-    }); 
+    });
 }
 
 // 聚合Marker
@@ -821,6 +1119,7 @@ function addSuperMapLayer(layers, url) {
     getWMS(layers, url, config);
 }
 
+
 // 工具
 var rectTool, rectOverlay, lineTool;
 var marker, markerTool;
@@ -889,7 +1188,6 @@ function addTools() {
         circleTool.close();
     });
 }
-
 
 module.exports = {
     onLoad: onLoad

@@ -11,20 +11,17 @@
       <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
   <![endif]-->
-  <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="http://api.tianditu.gov.cn/api?v=3.0&tk=7a1d904db1ad0e570a1b0afc5eab78c4"></script>
   <style type="text/css">
     .search {
       font-size: 13px;
-      padding-left: 7px;
-      background: white;
-    }
-
-    .ls {
       line-height: 27px;
-      padding-left: 7px;
-      background: white
+      padding: 5px;
+      margin: auto;
+      background: white;
     }
 
     .prompt {
@@ -41,6 +38,7 @@
       overflow-y: scroll;
       padding-left: 7px;
       background: white;
+      max-height: 300px;
     }
 
     .suggests {
@@ -87,21 +85,25 @@
       background-color: #337ab7;
     }
 
-    div#statisticsDiv a:hover{
+    div#statisticsDiv a:hover {
       cursor: pointer;
     }
   </style>
   <script>
     $(function () {
+      // 回车触发按钮的click事件
       jQuery('div.search>input#keywords').keypress(function (e) {
         var keyCode = e.keyCode || window.event.keyCode || e.which;
         if (event.keyCode == "13") {
           jQuery('div.search>input#searchBtn').click();
         }
       });
+      //tab切换
+      jQuery("ul#myTab a").click(function (e) {
+        e.preventDefault();
+        $(this).tab('show');
+      });
     });
-
-
   </script>
 </head>
 
@@ -120,38 +122,69 @@
         <button id="zoomIn" class="btn btn-primary btn-xs">放大</button>
         <button id="zoomOut" class="btn btn-primary btn-xs">缩小</button>
       </div>
-      <div id="search_tool" style="position:fixed;top:130px;right:370px;">
-        <!--搜索面板-->
-        <div class="search">
-          <input type="text" id="keywords" value="KFC" style="border:0px solid #999999;font-size:large">
-          <input type="button" id="searchBtn" value="搜索">
-        </div>
-        <br />
-        <!--提示词面板-->
-        <div id="promptDiv" class="prompt"></div>
-        <!--统计面板-->
-        <div id="statisticsDiv" class="statistics" style="max-height:300px;"></div>
-        <!-- 建议词面板 -->
-        <div id="suggestsDiv" class="suggests"></div>
-        <!-- 公交提示面板 -->
-        <div id="lineDataDiv" class="lineData"></div>
-        <!--搜索结果面板-->
-        <div id="resultDiv" class="result">
-          <div id="searchDiv"></div>
-          <div id="pageDiv">
-            <input type="button" value="第一页">
-            <input type="button" value="上一页">
-            <input type="button" value="下一页">
-            <input type="button" value="最后一页">
-            <br>
-            转到第<input type="text" name="" id="pageId" value="1" size="3">页
-            <input type="button" value="转到">
+      <!--地图上的搜索控件-->
+      <div id="tab-search-container" class="tabbable">
+        <ul class="nav nav-tabs" id="myTab">
+          <li class="active" style="background-color:#ddd"><a href="#positionSearch">位置搜索</a></li>
+          <li style="background-color:#ddd"><a href="#lineSearch">路线搜索</a></li>
+        </ul>
+        <div class="tab-content" style="width:300px;border:1px solid #ddd;">
+          <div class="tab-pane active" id="positionSearch">
+            <!--搜索面板-->
+            <div class="search">
+              <input type="text" id="keywords" value="KFC" style="margin:3px;font-size:large;">
+              <input type="button" id="searchBtn" value="搜索"><br>
+              <label for="searchBound" style="margin:0 3px 0"><input type="checkbox" name=""
+                  id="searchBound">绘制搜索范围</label>
+            </div>
+            <!--提示词面板-->
+            <div id="promptDiv" class="prompt"></div>
+            <!--统计面板-->
+            <div id="statisticsDiv" class="statistics"></div>
+            <!-- 建议词面板 -->
+            <div id="suggestsDiv" class="suggests"></div>
+            <!-- 公交提示面板 -->
+            <div id="lineDataDiv" class="lineData"></div>
+            <!--搜索结果面板-->
+            <div id="resultDiv1" class="result">
+              <div id="searchDiv"></div>
+              <div id="pageDiv">
+                <input type="button" value="第一页">
+                <input type="button" value="上一页">
+                <input type="button" value="下一页">
+                <input type="button" value="最后一页">
+                <br>
+                转到第<input type="text" id="pageId" value="1" size="3">页
+                <input type="button" value="转到">
+              </div>
+            </div>
+
+          </div>
+          <div class="tab-pane" id="lineSearch" style="background-color:white;padding:5px">
+            <!--查询面板-->
+            <div class="search" >
+              <input type="radio" id="plan1" name="planType" value="1" checked="checked"><label for="plan1">较快捷</label>
+              <input type="radio" id="plan2" name="planType" value="2"><label for="plan2">少换乘</label>
+              <input type="radio" id="plan3" name="planType" value="3"><label for="plan3">少步行</label>
+              <input type="radio" id="plan4" name="planType" value="4"><label for="plan4">不坐地铁</label>
+              <br/>起点：
+              <input type="text" id="start" value="118.79365,32.08950">
+              <input class="btn btn-default" type="button" value="起点">
+              <br/>终点：
+              <input type="text" id="end" value="118.63752,32.07751">
+              <input class="btn btn-default" type="button" value="终点">
+              <br/>
+              <input class="btn btn-default" type="button" value="公交搜索">
+            </div>
+            <!--结果面板-->
+            <!--class="result"??-->
+            <div id="resultDiv2" style="display:none;height:250px;overflow-y:scroll;background:white"></div>
           </div>
         </div>
       </div>
     </div>
 
-
+    <!--右侧工具-->
     <div id="ToolBar" class="col-sm-4 col-md-3 hidden-xs panel panel-info"
       style="height: 100%; padding-left:0px;padding-right: 0px; margin-left:15px;margin-right:-15px;overflow-y:scroll">
       <div class="panel-heading">
