@@ -40,7 +40,18 @@ module.exports={
                              }
                          }
                      },{
-                        loader: 'postcss-loader'
+                        loader: 'postcss-loader',
+                        options:{
+                            plugins: ()=> [
+                                require('autoprefixer')({
+                                    browsers:[
+                                        "> 1%",
+                                        "last 2 versions",
+                                        "not ie <= 8"
+                                    ]
+                                })
+                            ]
+                        }
                 }],
                 exclude: /(node_modules|\.vscode)/
             },{
@@ -62,7 +73,8 @@ module.exports={
         new CleanWebpackPlugin(),
         new MiniCssExtractPlugin({
             filename:'[name].css'
-        })
+        }),
+
     ],
     externals:{
         

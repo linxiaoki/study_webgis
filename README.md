@@ -1,37 +1,20 @@
-# WebGIS练手
+展示地图
 
-#### 项目介绍
-练手
+地图控件：缩放平移，鹰眼，比例尺，版权
+    控件的位置，透明度，显示隐藏
+    自定义控件：位置，颜色，透明度，图标，
 
-#### 软件架构
-软件架构说明
+覆盖物： 如标注，矢量图形元素(折线,多边形,矩形,椭圆,圆),信息窗口。
+        (点击标注弹出信息窗，可编辑的折线，聚合marker(大量标注点))
 
+事件：触发JS事件(如：点击、拖拽、滑动)
 
-#### 安装教程
+图层：图层可以叠加
+    自定义图层(图块格式，透明度，图块网址模版(用来解析放置位置?))
+    WMS图层
 
-1. xxxx
-2. xxxx
-3. xxxx
+地图工具：内置工具(标注工具,矩形工具,折线工具(测距),多边形工具(面积)，画圆工具)
 
-#### 使用说明
+右键菜单：作为容器放置使用的工具，控件
 
-1. xxxx
-2. xxxx
-3. xxxx
-
-#### 参与贡献
-
-1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request
-
-
-#### 码云特技
-
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2. 码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3. 你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5. 码云官方提供的使用手册 [http://git.mydoc.io/](http://git.mydoc.io/)
-6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+！服务：
