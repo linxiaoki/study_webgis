@@ -1,4 +1,4 @@
-//webpack.config.js
+//webpack.production.config.js
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
@@ -6,14 +6,13 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require('path');
 
 module.exports={
-    mode: "development",
-    //entry: __dirname+"/app/main.js",
-    entry: path.resolve(__dirname, "app/main.js"),
+    mode: "production",
+    entry: path.resolve(__dirname, "app/main.js"), //entry: __dirname+"/app/main.js",
     output: {
         path: __dirname+"/build",
         filename: "bundle-[hash].js"
     },
-    devtool: "eval-source-map",
+    devtool: "none",
     devServer: {
         contentBase: "./build",
         historyApiFallback: true,
@@ -56,6 +55,7 @@ module.exports={
         ]
     },
     plugins:[
+        new webpack.BannerPlugin('版权非所有，翻版不究(×_×)'),
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname,"app/index.tmpl.html")
         }),

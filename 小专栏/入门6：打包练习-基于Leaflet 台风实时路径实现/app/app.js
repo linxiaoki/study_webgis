@@ -24,13 +24,17 @@ var basemap = {
 };
 L.control.layers(basemap).addTo(map);
 
-
+// 本地演示数据（git page 上资源被阻止加载
+//var typhoondata = require("./typhoonSampleData.js/index.js");
+import {typhoonData_} from "./typhoonSampleData";
+addPolylineAndMarker(typhoonData_);
+/*通过回调函数获取数据
 jQuery.ajax('http://typhoon.zjwater.gov.cn/Api/TyphoonInfo/201926', {
     type: 'GET',
     dataType: 'jsonp',
     jsonp: 'callback',
     success: addPolylineAndMarker
-});
+});*/
 
 
 /*
@@ -43,6 +47,7 @@ documentHead.append(js);
 
 //回调函数： 动态画线
 function addPolylineAndMarker(typhoonData) {
+    //console.log(JSON.stringify(typhoonData));
     // 动态画线
     function animateDrawLine(points, icon, popupContent) {
         var drawPoints = [points[0]];
@@ -82,7 +87,7 @@ function addPolylineAndMarker(typhoonData) {
         iconSize: [28, 28],
         iconAnchor: [14, 14]
     });
-    popupContent = '<b>' + typhoonData[0]['name'] + '</b></br>' +
+    var popupContent = '<b>' + typhoonData[0]['name'] + '</b></br>' +
         forecast[forecast.length - 1]['jl'];
     // 动态画线
     animateDrawLine(polylinePoints, typhoonIcon, popupContent);
