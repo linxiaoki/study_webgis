@@ -25,6 +25,7 @@ id 这个参数该怎么填：参考[mapbox docs/ styles id](https://docs.mapbox
 [mapbox 地图API文档](https://docs.mapbox.com/api/maps/#static-tiles)
 
 #### 图层
+生成图层后添加： L.tileLayer( ).addTo(map);  或者初始化地图时添加： L.map('map'{.....,layers: [  ,  ,   ]})
 ##### geojson
 ```js
 // 注意：坐标是 经度(lng)，纬度(lat)，和 leaflet默认的相反
@@ -57,6 +58,11 @@ filter(feature,layer)     （返回 true 则添加）
 {"color": "red"}
 
 ```
+
+##### 图层组 layerGroup
+- 一次只能显示一个基本图层（radioButton）
+- 覆盖层可以显示多个（checkBox）
+
 
 #### 覆盖物：标注，矢量图形元素，信息窗口
 ```js
@@ -108,4 +114,4 @@ map.off('click')
 示例4：geojson
 示例5：交互式地区分布图
 通过geojson实现的（根据人口密度自定义颜色等级，鼠标悬浮时突出显示，自定义信息(鼠标移入与移出时都更新信息显示)、图例控件）。
-实例6：图层组和图层控件
+实例6：图层组和图层控件(通过 layergroup 添加一堆marker)
