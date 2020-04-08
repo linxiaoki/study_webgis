@@ -2,7 +2,7 @@
 import statesData from "./us-states";
 var map;
 var mpaboxAttribution = 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors,<a href="https://creativecommons.org/licenses/by-sa/2.0/"CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/"Mapbox</a>';
-var mapboxAccessToken = 'token';
+var mapboxAccessToken = 'pk.eyJ1IjoiZWRlbjEwNyIsImEiOiJjaXdtMnl5aDYwMDBhMm5tdHV2M3JvYjN2In0.q6DngKEYuQJtBIMWDlNucw';
 var mapboxUrl = "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=" + mapboxAccessToken;
 
 
@@ -375,6 +375,179 @@ export function onLoad_InteractiveMap() {
     }
 }
 
+// 缩放等级
+export function onLoad_zoomlevel(){
+    map = L.map('mapDiv',{
+        minZoom: 1,
+        maxZoom: 1
+    });
+    var cartodbAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution">CARTO</a>';
+    var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
+        attribution: cartodbAttribution
+    }).addTo(map);
+    map.setView([0,0],1);
+    L.control.scale().addTo(map);
+    setInterval(function(){
+        map.setView([0,0]);
+        setTimeout(function(){
+            map.setView([60,0]);
+        },2000);
+    },4000);
+}
+
+// 游戏地图
+export function onLoad_gamemap(){
+    map = L.map('mapDiv',{
+        crs: L.CRS.Simple,
+        minZoom: -5
+    });
+    var bounds = [[-26.5,-25],[1021.5,1023]];  // 地图单位的范围 ， 图片的像素大小是：2315 × 2315
+    var image = L.imageOverlay('https://leafletjs.com/examples/crs-simple/uqm_map_full.png',bounds).addTo(map);
+    map.fitBounds(bounds);
+    // 坐标系统：latlng(yx) =>  lnglat(xy)
+    var yx = L.latLng;
+    var xy = function(x,y){ // 以x,y的顺序输入坐标值，返回正确的坐标对象L.LatLng
+        return L.Util.isArray(x) ? yx(x[1],x[0]) : yx(y,x);
+    }
+    // 添加marker
+    // 图片像素是： 2315 * 2315
+    var sol = L.latLng([145, 175.2]);
+    var sol = xy(175.2, 145);
+    var mizar = xy(41.6, 130.1);
+    var kruegerZ = xy(13.4, 56.5);
+    var deneb = xy(218.7, 8.3);
+    L.marker(sol     ).bindPopup('Sol'      ).addTo(map);
+    L.marker(mizar   ).bindPopup('Mizar'    ).addTo(map);
+    L.marker(kruegerZ).bindPopup('Krueger-Z').addTo(map);
+    L.marker(deneb   ).bindPopup('Deneb'    ).addTo(map);
+    var travel = L.polyline([sol, deneb]).addTo(map);
+    map.setView([120,270],1);
+}
+
+
+// 图层：使用WMS服务
+export function onLoad_WMS(){
+    map = L.map("mapDiv",{
+        //crs: L.CRS.EPSG4326,
+        center: [50, -1],
+        zoom: 5
+    });
+    // 添加wms服务的图层，可以先用 QGIS 查看有什么图层
+    // http://ows.mundialis.de/services/service?request=GetCapabilities
+    var wmsurl = 'http://ows.mundialis.de/services/service?';
+    var basemaps = {
+        'Topography': L.tileLayer.wms(wmsurl,{
+            layers: 'TOPO-WMS'
+        }),
+        'Places': L.tileLayer.wms(wmsurl,{
+            layers: 'OSM-Overlay-WMS'
+        }),
+        'Topography, then places': L.tileLayer.wms(wmsurl,{
+            layers: 'TOPO-WMS,OSM-Overlay-WMS'
+        }),
+        'Places, then topography': L.tileLayer.wms(wmsurl,{
+            layers: 'OSM-Overlay-WMS,TOPO-WMS'
+        }),
+        'Topograph-OSM-WMS': L.tileLayer.wms(wmsurl,{
+            layers: 'TOPO-OSM-WMS'
+        })
+    };
+    L.control.layers(basemaps).addTo(map); // 图层管理控件
+    basemaps.Topography.addTo(map);
+}
+
+// panes：自定义图层顺序
+export function onLoad_panes(){
+    var map = L.map('mapDiv',{
+        center: [30,10],
+        zoom: 5
+    });
+    map.createPane('labels');
+    map.getPane('labels').style.zIndex = 650;
+    map.getPane('labels').style.pointerEvents = 'none';
+    var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/{id}/{z}/{x}/{y}.png',{
+        id: "light_nolabels",
+        attribution: '&copy;OpenStreetMap, &copy;CartoDB'
+    }).addTo(map);
+    var positronLabels = L.tileLayer('https://{s}.basemaps.cartocdn.com/{id}/{z}/{x}/{y}.png',{
+        id: 'light_only_labels',
+        attribution: '&copy;OpenStreetMap, &copy;CartoDB',
+        pane: 'labels'
+    }).addTo(map);
+    // geojson 数据在哪？
+    /* 
+    var geojson = L.geoJson(GeoJsonData, geoJsonOptions).addTo(map);
+    geojson.eachLayer(function(layer){
+        layer.bindPopup(layer.feature.properties.name);
+    });
+    map.fitBounds(geojson.getBounds()); */
+}
+
+// video in webpack
+export function onLoad_video(){
+    var map = L.map('mapDiv',{
+        center: [37.8, -96],
+        zoom: 4
+    });
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token='+mapboxAccessToken,{
+        id: 'mapbox/satellite-v9',
+        attribution: mpaboxAttribution,
+        tileSize: 512,
+        zoomOffset: -1
+    }).addTo(map);
+    var bounds = L.latLngBounds([[32,-130],[13,-100]]);
+    L.rectangle(bounds).addTo(map);
+    map.fitBounds(bounds);
+    var videoUrls = [
+        'https://www.mapbox.com/bites/00188/patricia_nasa.webm',
+        //'https://www.mapbox.com/bites/00188/patricia_nasa.mp4'
+    ];
+    var videoOverlay = L.videoOverlay(videoUrls, bounds, {
+        opacity: 0.6
+    }).addTo(map);
+    // load 初始化时触发
+    videoOverlay.on('load',function(){
+        // 暂停
+        var MyPauseControl = L.Control.extend({
+            onAdd: function(){
+                var button = L.DomUtil.create('button');
+                button.innerHTML = '⏸';
+                L.DomEvent.on(button, 'click', function(){
+                    videoOverlay.getElement().pause();
+                });
+                return button;
+            }
+        })
+        // 开始
+        var MyplayControl_ = L.control();
+        MyplayControl_.onAdd = function(){
+            this._button = L.DomUtil.create('button');
+            this._button.innerHTML = '▶️';
+            L.DomEvent.on(this._button, 'click', function(){
+                videoOverlay.getElement().play();
+            })
+            return this._button;
+        }
+        /* var MyPlayControl = L.Control.extend({
+            onAdd: function(){
+                var button = L.DomUtil.create('button');
+                button.innerHTML = '▶️';
+                L.DomEvent.on(button, 'click', function(){
+                    console.log("Element: ", videoOverlay.getElement());
+                    videoOverlay.getElement().play();
+                })
+                return button;
+            }
+        }); */
+
+        // 添加控件到地图
+        // ！ 暂停与开始，两种创建控件的方式，一种是扩展后new
+        var pauseControl = (new MyPauseControl()).addTo(map);
+        MyplayControl_.addTo(map);
+        //var playControl = (new MyPlayControl()).addTo(map);
+    })
+}
+
 
 export {
     onLoad as default, onLoad_mobile
@@ -384,4 +557,5 @@ export {
     onLoad: onLoad,
     onLoad_mobile: onLoad_mobile,
     onLoad_InteractiveMap: onLoad_InteractiveMap,
-} */
+}
+*/

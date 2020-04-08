@@ -115,3 +115,27 @@ map.off('click')
 示例5：交互式地区分布图
 通过geojson实现的（根据人口密度自定义颜色等级，鼠标悬浮时突出显示，自定义信息(鼠标移入与移出时都更新信息显示)、图例控件）。
 实例6：图层组和图层控件(通过 layergroup 添加一堆marker)
+实例7：缩放等级。
+    0级：256\*256，1级：256\*256\*4，以此类推，256*2<sup>n</sup>。
+    leaflet 在1.0.0 版本后的缩放等级可以是小数，需要使用 zoomSnap 可选项。(zoomDelta)
+实例8：非地球的地图（比如游戏地图
+    miniZoom 可以是负的。地图单位和像素
+实例9：WMS服务（Web Map Service)
+    L.tileLayer.wms()  对于 wms 服务的网址，可以现在类似 QGIS 的软件上查看有哪些图层。
+    L.tileLayer  -> tmw服务，网址请求相似，0.7版本用可选项 tms: true 标识，1.0 版本还可以用 -y 来标识。
+实例10：panes，图层的组合
+    默认的顺序，1.0版本后可以自定义顺序：
+      - TileLayers and GridLayers ， 图层
+      - Paths, like lines, polylines, circles, or GeoJSON layers. 链接，覆盖物，geojson
+      - Marker shadows，标记的阴影？
+      - Marker icons，标记的图标
+      - Popups，弹窗
+实例11：网页上加载影像
+    和添加图片覆盖相似：L.videoOverlay(videoUrls,bounds,options); 
+             》》图片：L.imageOverlay(imageUrl,bounds,options);
+    控制视频的控件 L.Control.extend({onAdd: funciton(){}}) 
+           或者： var pause = L.Control();    pause.onAdd = function(){  }
+           需要在 vidio 初始化时创建两个按钮控件，
+    两种创建控件的方式 ，L.Control.extend() 和 L.control();
+实例12：扩展
+    
