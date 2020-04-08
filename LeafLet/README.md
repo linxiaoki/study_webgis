@@ -104,38 +104,123 @@ map.off('click')
 
 #### [教程](https://leafletjs.com/examples.html)
 示例1：展示地图
+
 示例2：手机端展示，html页面的meta标签需要禁止滑动。定位失败(没科学上网？)。
+
 示例3：自定义图标，有阴影（)
     ```
     L.Icon.extend({options:{key:value}}   //扩展新的图标生成方法
     L.icon({key:value})         // 返回定义的图标
     ```
 
-示例4：geojson
+示例4：`geojson`
+
 示例5：交互式地区分布图
-通过geojson实现的（根据人口密度自定义颜色等级，鼠标悬浮时突出显示，自定义信息(鼠标移入与移出时都更新信息显示)、图例控件）。
-实例6：图层组和图层控件(通过 layergroup 添加一堆marker)
+&emsp;&emsp;通过geojson实现的（根据人口密度自定义颜色等级，鼠标悬浮时突出显示，自定义信息(鼠标移入与移出时都更新信息显示)、图例控件）。
+
+实例6：图层组和图层控件(通过 `layergroup` 添加一堆`marker`)
+
 实例7：缩放等级。
-    0级：256\*256，1级：256\*256\*4，以此类推，256*2<sup>n</sup>。
-    leaflet 在1.0.0 版本后的缩放等级可以是小数，需要使用 zoomSnap 可选项。(zoomDelta)
+&emsp;&emsp;0级：256\*256，1级：256\*256\*4，以此类推，256*2<sup>n</sup>。
+&emsp;&emsp;leaflet 在1.0.0 版本后的缩放等级可以是小数，需要使用 zoomSnap 可选项。(zoomDelta)
+
 实例8：非地球的地图（比如游戏地图
-    miniZoom 可以是负的。地图单位和像素
+&emsp;&emsp;miniZoom 可以是负的。地图单位和像素
+
 实例9：WMS服务（Web Map Service)
-    L.tileLayer.wms()  对于 wms 服务的网址，可以现在类似 QGIS 的软件上查看有哪些图层。
-    L.tileLayer  -> tmw服务，网址请求相似，0.7版本用可选项 tms: true 标识，1.0 版本还可以用 -y 来标识。
+&emsp;&emsp;L.tileLayer.wms()  对于 wms 服务的网址，可以现在类似 QGIS 的软件上查看有哪些图层。
+&emsp;&emsp;L.tileLayer  -> tmw服务，网址请求相似，0.7版本用可选项 tms: true 标识，1.0 版本还可以用 -y 来标识。
+
 实例10：panes，图层的组合
-    默认的顺序，1.0版本后可以自定义顺序：
-      - TileLayers and GridLayers ， 图层
-      - Paths, like lines, polylines, circles, or GeoJSON layers. 链接，覆盖物，geojson
-      - Marker shadows，标记的阴影？
-      - Marker icons，标记的图标
-      - Popups，弹窗
+- 默认的顺序，1.0版本后可以自定义顺序：
+  - TileLayers and GridLayers ， 图层
+  - Paths, like lines, polylines, circles, or GeoJSON layers. 链接，覆盖物，geojson
+  - Marker shadows，标记的阴影？
+  - Marker icons，标记的图标
+  - Popups，弹窗
+
 实例11：网页上加载影像
-    和添加图片覆盖相似：L.videoOverlay(videoUrls,bounds,options); 
-             》》图片：L.imageOverlay(imageUrl,bounds,options);
-    控制视频的控件 L.Control.extend({onAdd: funciton(){}}) 
+&emsp;&emsp;和添加图片覆盖相似：L.videoOverlay(videoUrls,bounds,options); 
+&emsp;&emsp;》》图片：L.imageOverlay(imageUrl,bounds,options);
+&emsp;&emsp;控制视频的控件 L.Control.extend({onAdd: funciton(){}}) 
            或者： var pause = L.Control();    pause.onAdd = function(){  }
            需要在 vidio 初始化时创建两个按钮控件，
     两种创建控件的方式 ，L.Control.extend() 和 L.control();
+
 实例12：扩展
+  - 创建子类：`L.Class.extend()`
+  ```js
+    var MyDemoClass = L.Class.extend({
+        myDemoProperty: 42, // 初始化值
+        myDemoMethod: function(){ retuen this.myDemoProperty;}  // 方法
+    });
+    var myDemoInstance = new MyDemoClass();
+    console.log(myDemoInstance.myDemoProperty); // 调用方法，返回初始值
+  ```
+  - 添加新的属性或方法，重新定义现有的属性或方法：`L.Class.include()`
+  ```js
+    MyDemoClass.include({
+        _myPrivateProperty: 78, // 添加一个新的私有变量
+        myDemoMethod： function(){return this._myPrivateProperty;} // 重新定义现有的方法
+    });
+    var mySecondDemoInstance = new MyDemoClass();
+    console.log(mySecondDemoInstance.myDemoMethod());  // 被重新定义的方法
+    conosle.log(mySecondDemoInstance.myDemoProperty); // 原有的属性
+  ```
+  - 类的构造：`L.Class.initialize()`
+  ```js
+  // 合并提供的选项
+  var MyBoxClass = L.Class.extend({
+      options:{
+          width: 1,
+          height: 1
+      },
+      initialize: function(name, options){
+          this.name = name;
+          L.setOptions(this, options);  // 合并提供的选项和该类的默认选项
+      };
+  });
+  var instance = new MyBoxClass('Red',{width: 10});
+  console.log(instance.name); // Red
+  console.log(instance.options.width);  //10  （合并提供的选项）
+  console.log(instance.options.height); //1
+  // 添加可选项
+  var MyCubeClass = MyBoxClass.extend({
+      options: {
+          depth: 1
+      }
+  });
+  var instance = new MyCubeClass('Blue');
+  console.log(instance.options.width);  // 1
+  console.log(instance.options.height); / 1
+  console.log(instance.options.depth);  // 1  (添加可选项)
+  // 挂钩在类之后运行的初始化函数：addInitHook
+  MyBoxClass.addInitHook(function(){
+      // 子类会先运行父类的构造函数(initialize)，然后在运行自己的构造函数
+      this._area = this.options.width * this.options.length; 
+  })
+  // addInitHook 的备用语法?
+  MyCubeClass.include({
+      // 添加一个新的方法
+      _calculateVolume: function(arg1,arg2){
+          this._volume = this.options.width * this.options.length * this.options.depth;
+      }
+  })
+  MyCubeClass.addInitHook('_calculateVolume', argValue1, argValue2);
+  ```
+  - 调用父类的方法：`Function.call(...)`
+  ```js
+    L.FeatureGroup = L.LayerGroup.extend({
+        addLayer: function(layer){
+            //...
+            L.LayerGroup.prototype.addLayer.call(this,layer); // 通过进入父类的原型
+        },
+        removeLayer: function(layer){
+            //...
+            L.LayerGroup.prototype.removeLayer.call(this.layer);
+        }
+    });
+    // 调用父类的构造函数： ParentClass.prototype.initialize.call(this, ...)
+    // 关于原型：
+  ```
     
